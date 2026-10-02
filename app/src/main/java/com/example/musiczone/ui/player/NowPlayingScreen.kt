@@ -75,6 +75,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.BoxWithConstraints
 
 private val FallbackBackgroundColors = listOf(
     Color(0xFF24143D),
@@ -197,171 +198,165 @@ fun NowPlayingScreen(
                 )
         )
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    horizontal = 24.dp,
-                    vertical = 20.dp
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize()
         ) {
+            val artworkSize = when {
+                maxHeight < 650.dp -> 220.dp
+                maxHeight < 750.dp -> 260.dp
+                else -> 300.dp
+            }
 
-            // Top bar
-            Row(
+            val verticalSpacing = when {
+                maxHeight < 650.dp -> 8.dp
+                maxHeight < 750.dp -> 12.dp
+                else -> 18.dp
+            }
+
+            val playButtonSize = when {
+                maxHeight < 650.dp -> 60.dp
+                maxHeight < 750.dp -> 64.dp
+                else -> 68.dp
+            }
+
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 20.dp
+                    ),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                IconButton(
-                    onClick = onBack
+
+                // Top bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = MusicZoneTextPrimary
+                    IconButton(
+                        onClick = onBack
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MusicZoneTextPrimary
+                        )
+                    }
+
+                    Text(
+                        text = "Now Playing",
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MusicZoneTextPrimary,
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Balances the back button width.
+                    Spacer(modifier = Modifier.height(verticalSpacing))
+                }
+
+                Spacer(modifier = Modifier.height(verticalSpacing))
+
+                // Album artwork
+                AnimatedContent(
+                    targetState = song,
+                    transitionSpec = {
+                        (fadeIn(
+                            animationSpec = tween(400)
+                        ) + scaleIn(
+                            initialScale = 0.94f,
+                            animationSpec = tween(400)
+                        )) togetherWith
+                                (fadeOut(
+                                    animationSpec = tween(250)
+                                ) + scaleOut(
+                                    targetScale = 1.04f,
+                                    animationSpec = tween(250)
+                                ))
+                    },
+                    label = "main_artwork_transition"
+                ) { targetSong ->
+
+                    AlbumArtwork(
+                        song = targetSong,
+                        modifier = Modifier
+                            .size(artworkSize)
+                            .clip(RoundedCornerShape(24.dp))
                     )
                 }
 
+                Spacer(modifier = Modifier.height(verticalSpacing))
+
+                // Song title
                 Text(
-                    text = "Now Playing",
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
+                    text = song.title,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
                     color = MusicZoneTextPrimary,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
-                // Balances the back button width.
                 Spacer(
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.height(6.dp)
                 )
-            }
 
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
-
-            // Album artwork
-            AnimatedContent(
-                targetState = song,
-                transitionSpec = {
-                    (fadeIn(
-                        animationSpec = tween(400)
-                    ) + scaleIn(
-                        initialScale = 0.94f,
-                        animationSpec = tween(400)
-                    )) togetherWith
-                            (fadeOut(
-                                animationSpec = tween(250)
-                            ) + scaleOut(
-                                targetScale = 1.04f,
-                                animationSpec = tween(250)
-                            ))
-                },
-                label = "main_artwork_transition"
-            ) { targetSong ->
-
-                AlbumArtwork(
-                    song = targetSong,
-                    modifier = Modifier
-                        .size(300.dp)
-                        .clip(RoundedCornerShape(24.dp))
+                // Artist
+                Text(
+                    text = song.artist,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MusicZoneTextPrimary.copy(alpha = 0.88f),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-            }
 
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
+                Spacer(
+                    modifier = Modifier.height(3.dp)
+                )
 
-            // Song title
-            Text(
-                text = song.title,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MusicZoneTextPrimary,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+                // Album
+                Text(
+                    text = song.album,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MusicZoneTextSecondary,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
+                Spacer(modifier = Modifier.height(verticalSpacing))
 
-            // Artist
-            Text(
-                text = song.artist,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MusicZoneTextPrimary.copy(alpha = 0.88f),
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(
-                modifier = Modifier.height(3.dp)
-            )
-
-            // Album
-            Text(
-                text = song.album,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MusicZoneTextSecondary,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
-
-            // Custom thin seekbar
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(24.dp)
-                        .align(Alignment.Center)
+                // Custom thin seekbar
+                Box(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    val trackHeight = 3.dp.toPx()
-                    val y = size.height / 2f
-                    val radius = trackHeight / 2f
+                    Canvas(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(24.dp)
+                            .align(Alignment.Center)
+                    ) {
+                        val trackHeight = 3.dp.toPx()
+                        val y = size.height / 2f
+                        val radius = trackHeight / 2f
 
-                    drawRoundRect(
-                        color = MusicZoneSurface.copy(alpha = 0.85f),
-                        topLeft = androidx.compose.ui.geometry.Offset(
-                            0f,
-                            y - radius
-                        ),
-                        size = androidx.compose.ui.geometry.Size(
-                            size.width,
-                            trackHeight
-                        ),
-                        cornerRadius = CornerRadius(
-                            radius,
-                            radius
-                        )
-                    )
-
-                    val activeWidth = size.width * progress
-
-                    if (activeWidth > 0f) {
                         drawRoundRect(
-                            color = MusicZonePurple,
+                            color = MusicZoneSurface.copy(alpha = 0.85f),
                             topLeft = androidx.compose.ui.geometry.Offset(
                                 0f,
                                 y - radius
                             ),
                             size = androidx.compose.ui.geometry.Size(
-                                activeWidth,
+                                size.width,
                                 trackHeight
                             ),
                             cornerRadius = CornerRadius(
@@ -369,194 +364,214 @@ fun NowPlayingScreen(
                                 radius
                             )
                         )
+
+                        val activeWidth = size.width * progress
+
+                        if (activeWidth > 0f) {
+                            drawRoundRect(
+                                color = MusicZonePurple,
+                                topLeft = androidx.compose.ui.geometry.Offset(
+                                    0f,
+                                    y - radius
+                                ),
+                                size = androidx.compose.ui.geometry.Size(
+                                    activeWidth,
+                                    trackHeight
+                                ),
+                                cornerRadius = CornerRadius(
+                                    radius,
+                                    radius
+                                )
+                            )
+                        }
+
+                        val thumbRadius = if (isDragging) {
+                            7.dp.toPx()
+                        } else {
+                            4.dp.toPx()
+                        }
+
+                        drawCircle(
+                            color = MusicZonePurple,
+                            radius = thumbRadius,
+                            center = androidx.compose.ui.geometry.Offset(
+                                activeWidth.coerceIn(
+                                    thumbRadius,
+                                    size.width - thumbRadius
+                                ),
+                                y
+                            )
+                        )
                     }
 
-                    val thumbRadius = if (isDragging) {
-                        7.dp.toPx()
-                    } else {
-                        4.dp.toPx()
-                    }
+                    Slider(
+                        value = progress,
+                        onValueChange = { value ->
+                            isDragging = true
+                            dragProgress = value
+                        },
+                        onValueChangeFinished = {
+                            isDragging = false
 
-                    drawCircle(
-                        color = MusicZonePurple,
-                        radius = thumbRadius,
-                        center = androidx.compose.ui.geometry.Offset(
-                            activeWidth.coerceIn(
-                                thumbRadius,
-                                size.width - thumbRadius
-                            ),
-                            y
+                            onSeek(
+                                (dragProgress * duration).toLong()
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(24.dp),
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color.Transparent,
+                            activeTrackColor = Color.Transparent,
+                            inactiveTrackColor = Color.Transparent
                         )
                     )
                 }
 
-                Slider(
-                    value = progress,
-                    onValueChange = { value ->
-                        isDragging = true
-                        dragProgress = value
-                    },
-                    onValueChangeFinished = {
-                        isDragging = false
-
-                        onSeek(
-                            (dragProgress * duration).toLong()
-                        )
-                    },
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(24.dp),
-                    colors = SliderDefaults.colors(
-                        thumbColor = Color.Transparent,
-                        activeTrackColor = Color.Transparent,
-                        inactiveTrackColor = Color.Transparent
-                    )
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = 2.dp
-                    ),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = formatTime(currentPosition),
-                    color = MusicZoneTextSecondary,
-                    style = MaterialTheme.typography.labelSmall
-                )
-
-                Text(
-                    text = formatTime(duration),
-                    color = MusicZoneTextSecondary,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
-
-            Spacer(
-                modifier = Modifier.height(18.dp)
-            )
-
-            // Main playback controls
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                IconButton(
-                    onClick = onPrevious,
-                    modifier = Modifier.size(56.dp)
+                        .padding(
+                            top = 2.dp
+                        ),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.SkipPrevious,
-                        contentDescription = "Previous",
-                        tint = MusicZoneTextPrimary,
-                        modifier = Modifier.size(34.dp)
+                    Text(
+                        text = formatTime(currentPosition),
+                        color = MusicZoneTextSecondary,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+
+                    Text(
+                        text = formatTime(duration),
+                        color = MusicZoneTextSecondary,
+                        style = MaterialTheme.typography.labelSmall
                     )
                 }
 
                 Spacer(
-                    modifier = Modifier.width(20.dp)
+                    modifier = Modifier.height(18.dp)
                 )
 
-                // Main play/pause button
-                Box(
-                    modifier = Modifier
-                        .size(68.dp)
-                        .clip(CircleShape)
-                        .background(MusicZonePurple)
-                        .clickable(onClick = onPlayPause),
-                    contentAlignment = Alignment.Center
+                // Main playback controls
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = if (isPlaying) {
-                            Icons.Default.Pause
-                        } else {
-                            Icons.Default.PlayArrow
-                        },
-                        contentDescription = if (isPlaying) {
-                            "Pause"
-                        } else {
-                            "Play"
-                        },
-                        tint = MusicZoneOnPrimary,
-                        modifier = Modifier.size(36.dp)
+
+                    IconButton(
+                        onClick = onPrevious,
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SkipPrevious,
+                            contentDescription = "Previous",
+                            tint = MusicZoneTextPrimary,
+                            modifier = Modifier.size(34.dp)
+                        )
+                    }
+
+                    Spacer(
+                        modifier = Modifier.width(20.dp)
                     )
+
+                    // Main play/pause button
+                    Box(
+                        modifier = Modifier
+                            .size(playButtonSize)
+                            .clip(CircleShape)
+                            .background(MusicZonePurple)
+                            .clickable(onClick = onPlayPause),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (isPlaying) {
+                                Icons.Default.Pause
+                            } else {
+                                Icons.Default.PlayArrow
+                            },
+                            contentDescription = if (isPlaying) {
+                                "Pause"
+                            } else {
+                                "Play"
+                            },
+                            tint = MusicZoneOnPrimary,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+
+                    Spacer(
+                        modifier = Modifier.width(20.dp)
+                    )
+
+                    IconButton(
+                        onClick = onNext,
+                        modifier = Modifier.size(56.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.SkipNext,
+                            contentDescription = "Next",
+                            tint = MusicZoneTextPrimary,
+                            modifier = Modifier.size(34.dp)
+                        )
+                    }
                 }
 
                 Spacer(
-                    modifier = Modifier.width(20.dp)
+                    modifier = Modifier.height(14.dp)
                 )
 
-                IconButton(
-                    onClick = onNext,
-                    modifier = Modifier.size(56.dp)
+                // Secondary controls
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.SkipNext,
-                        contentDescription = "Next",
-                        tint = MusicZoneTextPrimary,
-                        modifier = Modifier.size(34.dp)
+
+                    IconButton(
+                        onClick = onShuffle,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Shuffle,
+                            contentDescription = "Shuffle",
+                            tint = if (isShuffleEnabled) {
+                                MusicZonePurple
+                            } else {
+                                MusicZoneTextSecondary
+                            },
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    Spacer(
+                        modifier = Modifier.width(32.dp)
                     )
-                }
-            }
 
-            Spacer(
-                modifier = Modifier.height(14.dp)
-            )
+                    IconButton(
+                        onClick = onRepeat,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Icon(
+                            imageVector = when (repeatMode) {
+                                Player.REPEAT_MODE_ONE ->
+                                    Icons.Default.RepeatOne
 
-            // Secondary controls
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                IconButton(
-                    onClick = onShuffle,
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Shuffle,
-                        contentDescription = "Shuffle",
-                        tint = if (isShuffleEnabled) {
-                            MusicZonePurple
-                        } else {
-                            MusicZoneTextSecondary
-                        },
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-
-                Spacer(
-                    modifier = Modifier.width(32.dp)
-                )
-
-                IconButton(
-                    onClick = onRepeat,
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    Icon(
-                        imageVector = when (repeatMode) {
-                            Player.REPEAT_MODE_ONE ->
-                                Icons.Default.RepeatOne
-
-                            else ->
-                                Icons.Default.Repeat
-                        },
-                        contentDescription = "Repeat",
-                        tint = if (
-                            repeatMode != Player.REPEAT_MODE_OFF
-                        ) {
-                            MusicZonePurple
-                        } else {
-                            MusicZoneTextSecondary
-                        },
-                        modifier = Modifier.size(22.dp)
-                    )
+                                else ->
+                                    Icons.Default.Repeat
+                            },
+                            contentDescription = "Repeat",
+                            tint = if (
+                                repeatMode != Player.REPEAT_MODE_OFF
+                            ) {
+                                MusicZonePurple
+                            } else {
+                                MusicZoneTextSecondary
+                            },
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
                 }
             }
         }
@@ -600,7 +615,7 @@ fun AlbumArtwork(
             contentScale = ContentScale.Crop
         )
     } else {
-        Box(
+        BoxWithConstraints(
             modifier = modifier
                 .background(MusicZoneElevated),
             contentAlignment = Alignment.Center
@@ -608,7 +623,7 @@ fun AlbumArtwork(
             Text(
                 text = "♪",
                 color = MusicZonePurple,
-                fontSize = 64.sp
+                fontSize = (maxWidth.value * 0.45f).sp
             )
         }
     }
