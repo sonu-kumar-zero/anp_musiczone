@@ -185,6 +185,14 @@ class MusicController(
         }
     }
 
+    fun skipPrevious() {
+        controller?.seekToPreviousMediaItem()
+    }
+
+    fun skipNext() {
+        controller?.seekToNextMediaItem()
+    }
+
     fun release() {
         positionJob?.cancel()
         controller?.removeListener(playerListener)

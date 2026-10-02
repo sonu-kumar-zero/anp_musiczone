@@ -141,6 +141,14 @@ class MusicViewModel(
         musicController.cycleRepeatMode()
     }
 
+    fun skipPrevious() {
+        musicController.skipPrevious()
+    }
+
+    fun skipNext() {
+        musicController.skipNext()
+    }
+
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }

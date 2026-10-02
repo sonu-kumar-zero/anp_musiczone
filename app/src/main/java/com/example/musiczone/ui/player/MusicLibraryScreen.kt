@@ -1,9 +1,7 @@
 package com.example.musiczone.ui.player
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,15 +13,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.musiczone.model.Song
 import com.example.musiczone.ui.MusicViewModel
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import com.example.musiczone.ui.theme.MusicZoneElevated
+import com.example.musiczone.ui.theme.MusicZonePurple
+import com.example.musiczone.ui.theme.MusicZoneSurface
+import com.example.musiczone.ui.theme.MusicZoneTextPrimary
+import com.example.musiczone.ui.theme.MusicZoneTextSecondary
+
 
 private const val ROUTE_LIBRARY = "library"
 private const val ROUTE_NOW_PLAYING = "now_playing"
@@ -56,12 +66,8 @@ public fun MusicLibraryScreen(
         composable(ROUTE_LIBRARY) {
             Column(
                 modifier = Modifier.fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
             ) {
-                Text(
-                    text = "MusicZone",
-                    modifier = Modifier.padding(16.dp)
-                )
-
                 when {
                     isLoading -> {
                         Text(
@@ -81,15 +87,55 @@ public fun MusicLibraryScreen(
                         OutlinedTextField(
                             value = searchQuery,
                             onValueChange = { query ->
-                                viewModel.updateSearchQuery(query) },
+                                viewModel.updateSearchQuery(query)
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
+                                .padding(
+                                    horizontal = 16.dp,
+                                    vertical = 8.dp
+                                ),
                             placeholder = {
-                                Text("Search songs...")
+                                Text(
+                                    text = "Search songs, artists, albums...",
+                                    color = MusicZoneTextSecondary
+                                )
                             },
-                            singleLine = true
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search",
+                                    tint = MusicZonePurple
+                                )
+                            },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(
+                                        onClick = {
+                                            viewModel.updateSearchQuery("")
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Clear search",
+                                            tint = MusicZoneTextSecondary
+                                        )
+                                    }
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(28.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MusicZoneSurface,
+                                unfocusedContainerColor = MusicZoneSurface,
+                                focusedBorderColor = MusicZonePurple,
+                                unfocusedBorderColor = MusicZoneElevated,
+                                cursorColor = MusicZonePurple,
+                                focusedTextColor = MusicZoneTextPrimary,
+                                unfocusedTextColor = MusicZoneTextPrimary
+                            )
                         )
+
 
                         if (filteredSongs.isEmpty()) {
                             Text(
@@ -109,6 +155,9 @@ public fun MusicLibraryScreen(
                                     SongItem(
                                         song = song,
                                         onClick = {
+                                            viewModel.playSong(song)
+                                        },
+                                        onPlay = {
                                             viewModel.playSong(song)
                                         }
                                     )
@@ -155,135 +204,35 @@ public fun MusicLibraryScreen(
         composable(ROUTE_NOW_PLAYING) {
             currentSong?.let { song ->
                 NowPlayingScreen(
-                    song = song
+                    song = song,
+                    isPlaying = isPlaying,
+                    currentPosition = currentPosition,
+                    duration = duration,
+                    isShuffleEnabled = isShuffleEnabled,
+                    repeatMode = repeatMode,
+                    onPlayPause = {
+                        viewModel.togglePlayPause()
+                    },
+                    onPrevious = {
+                        viewModel.skipPrevious()
+                    },
+                    onNext = {
+                        viewModel.skipNext()
+                    },
+                    onSeek = { position ->
+                        viewModel.seekTo(position)
+                    },
+                    onShuffle = {
+                        viewModel.toggleShuffle()
+                    },
+                    onRepeat = {
+                        viewModel.cycleRepeatMode()
+                    },
+                    onBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }
     }
-}
-
-@Composable
-private fun SongItem(
-    song: Song,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp)
-    ) {
-        Text(song.title)
-        Text(song.artist)
-    }
-}
-
-@Composable
-private fun NowPlayingBar(
-    song: Song,
-    isPlaying: Boolean,
-    currentPosition: Long,
-    duration: Long,
-    onPlayPause: () -> Unit,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
-    onSeek: (Long) -> Unit,
-    isShuffleEnabled: Boolean,
-    onShuffle: () -> Unit,
-    repeatMode: Int,
-    onRepeat: ()-> Unit,
-    onOpenPlayer: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clickable(onClick = onOpenPlayer)
-    ) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(song.title)
-                Text(song.artist)
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Text(
-                text = "⏮",
-                modifier = Modifier
-                    .clickable(onClick = onPrevious)
-                    .padding(8.dp)
-            )
-
-            Text(
-                text = if (isShuffleEnabled) "🔀" else "⤨",
-                modifier = Modifier
-                    .clickable(onClick = onShuffle)
-                    .padding(8.dp)
-            )
-
-            Text(
-                text = if (isPlaying) "⏸" else "▶",
-                modifier = Modifier
-                    .clickable(onClick = onPlayPause)
-                    .padding(8.dp)
-            )
-
-            Text(
-                text = when (repeatMode) {
-                    androidx.media3.common.Player.REPEAT_MODE_ALL -> "🔁"
-                    androidx.media3.common.Player.REPEAT_MODE_ONE -> "🔂"
-                    else -> "↩"
-                },
-                modifier = Modifier
-                    .clickable(onClick = onRepeat)
-                    .padding(8.dp)
-            )
-
-            Text(
-                text = "⏭",
-                modifier = Modifier
-                    .clickable(onClick = onNext)
-                    .padding(8.dp)
-            )
-        }
-
-        androidx.compose.material3.Slider(
-            value = currentPosition.toFloat(),
-            onValueChange = { value ->
-                onSeek(value.toLong())
-            },
-            valueRange = 0f..duration.toFloat(),
-            enabled = duration > 0L
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(formatTime(currentPosition))
-            Text(formatTime(duration))
-        }
-    }
-}
-
-private fun formatTime(milliseconds: Long): String {
-    val totalSeconds = milliseconds / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-
-    return "%d:%02d".format(
-        minutes,
-        seconds
-    )
 }

@@ -58,4 +58,5 @@ dependencies {
     implementation(libs.media3.session)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
 }
