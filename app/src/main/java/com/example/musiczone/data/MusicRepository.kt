@@ -1,3 +1,4 @@
+
 package com.example.musiczone.data
 
 import android.content.ContentResolver
@@ -66,7 +67,7 @@ class MusicRepository(
                         artist = cursor.getString(artistColumn),
                         album = cursor.getString(albumColumn),
                         duration = cursor.getLong(durationColumn),
-                        uri = songUri
+                        uri = songUri,
                     )
                 )
             }

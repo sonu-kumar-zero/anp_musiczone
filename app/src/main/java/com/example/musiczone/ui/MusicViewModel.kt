@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 
 class MusicViewModel(
     application: Application
@@ -20,13 +23,72 @@ class MusicViewModel(
         application.contentResolver
     )
 
-    private val musicController = MusicController(application)
+    private val musicController = MusicController(
+        application
+    )
+
+    val isPlaying: StateFlow<Boolean> = musicController.isPlaying
 
     private val _songs = MutableStateFlow<List<Song>>(emptyList())
     val songs: StateFlow<List<Song>> = _songs.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _currentSong = MutableStateFlow<Song?>(null)
+    val currentSong: StateFlow<Song?> = _currentSong.asStateFlow()
+
+    val currentPosition: StateFlow<Long> = musicController.currentPosition
+    val duration: StateFlow<Long> = musicController.duration
+
+    val isShuffleEnabled: StateFlow<Boolean> =
+        musicController.isShuffleEnabled
+
+    val repeatMode: StateFlow<Int> =
+        musicController.repeatMode
+
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    val filteredSongs: StateFlow<List<Song>> =
+        combine(
+            _songs,
+            _searchQuery
+        ) { songs, query ->
+            if (query.isBlank()) {
+                songs
+            } else {
+                val search = query.trim()
+
+                songs.filter { song ->
+                    song.title.contains(search, ignoreCase = true) ||
+                            song.artist.contains(search, ignoreCase = true) ||
+                            song.album.contains(search, ignoreCase = true)
+                }
+            }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            emptyList()
+        )
+
+    init {
+        viewModelScope.launch {
+            musicController.currentMediaItem.collect { mediaItem ->
+                if (mediaItem == null) {
+                    _currentSong.value = null
+                    return@collect
+                }
+
+                val songId = mediaItem.mediaId.toLongOrNull()
+
+                _currentSong.value = _songs.value.firstOrNull { song ->
+                    song.id == songId
+                }
+            }
+        }
+    }
 
     fun loadSongs() {
         viewModelScope.launch(Dispatchers.IO) {
@@ -42,6 +104,7 @@ class MusicViewModel(
 
     fun playSong(song: Song) {
         val currentSongs = _songs.value
+
         val startIndex = currentSongs.indexOfFirst { it.id == song.id }
 
         if (startIndex == -1) {
@@ -52,6 +115,34 @@ class MusicViewModel(
             currentSongs,
             startIndex
         )
+    }
+
+    fun togglePlayPause() {
+        musicController.togglePlayPause()
+    }
+
+    fun seekTo(position: Long) {
+        musicController.seekTo(position)
+    }
+
+    fun previousSong() {
+        musicController.previousSong()
+    }
+
+    fun nextSong() {
+        musicController.nextSong()
+    }
+
+    fun toggleShuffle() {
+        musicController.toggleShuffle()
+    }
+
+    fun cycleRepeatMode() {
+        musicController.cycleRepeatMode()
+    }
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
     }
 
     override fun onCleared() {
