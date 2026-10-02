@@ -1,6 +1,7 @@
 package com.example.musiczone.ui.player
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,99 +49,96 @@ public fun NowPlayingBar(
     onRepeat: () -> Unit,
     onOpenPlayer: () -> Unit
 ) {
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
                 horizontal = 12.dp,
                 vertical = 8.dp
             )
-            .clickable(onClick = onOpenPlayer),
-        color = MusicZoneElevated,
-        shape = RoundedCornerShape(14.dp),
-        tonalElevation = 0.dp,
-        shadowElevation = 8.dp
     ) {
-        Column {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpenPlayer),
+            color = MusicZoneElevated,
+            shape = RoundedCornerShape(14.dp),
+            tonalElevation = 0.dp,
+            shadowElevation = 8.dp
+        ) {
+            Column {
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        start = 8.dp,
-                        end = 6.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    ),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                AlbumArtwork(
-                    song = song,
+                Row(
                     modifier = Modifier
-                        .size(52.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
-
-                Spacer(
-                    modifier = Modifier.width(12.dp)
-                )
-
-                Column(
-                    modifier = Modifier.weight(1f)
+                        .fillMaxWidth()
+                        .padding(
+                            start = 8.dp, end = 6.dp, top = 8.dp, bottom = 8.dp
+                        ), verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = song.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MusicZoneTextPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+
+                    AlbumArtwork(
+                        song = song, modifier = Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(8.dp))
                     )
 
-                    Text(
-                        text = song.artist,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MusicZoneTextSecondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    Spacer(
+                        modifier = Modifier.width(12.dp)
                     )
-                }
 
-                IconButton(
-                    onClick = onPlayPause
-                ) {
-                    Icon(
-                        imageVector = if (isPlaying) {
-                            Icons.Default.Pause
-                        } else {
-                            Icons.Default.PlayArrow
-                        },
-                        contentDescription = if (isPlaying) {
-                            "Pause"
-                        } else {
-                            "Play"
-                        },
-                        tint = MusicZonePurple
-                    )
-                }
-            }
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = song.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MusicZoneTextPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
 
-            // Thin progress indicator
-            LinearProgressIndicator(
-                progress = {
-                    if (duration > 0L) {
-                        (currentPosition.toFloat() / duration.toFloat())
-                            .coerceIn(0f, 1f)
-                    } else {
-                        0f
+                        Text(
+                            text = song.artist,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MusicZoneTextSecondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp),
-                color = MusicZonePurple,
-                trackColor = MusicZoneSurface
-            )
+
+                    IconButton(
+                        onClick = onPlayPause
+                    ) {
+                        Icon(
+                            imageVector = if (isPlaying) {
+                                Icons.Default.Pause
+                            } else {
+                                Icons.Default.PlayArrow
+                            }, contentDescription = if (isPlaying) {
+                                "Pause"
+                            } else {
+                                "Play"
+                            }, tint = MusicZonePurple
+                        )
+                    }
+                }
+
+                // Thin progress indicator
+                LinearProgressIndicator(
+                    progress = {
+                        if (duration > 0L) {
+                            (currentPosition.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
+                        } else {
+                            0f
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp),
+                    color = MusicZonePurple,
+                    trackColor = MusicZoneSurface
+                )
+            }
         }
     }
 }
