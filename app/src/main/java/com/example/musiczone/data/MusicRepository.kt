@@ -6,7 +6,8 @@ import android.provider.MediaStore
 import com.example.musiczone.model.Song
 
 class MusicRepository(
-    private val contentResolver: ContentResolver
+    private val contentResolver: ContentResolver,
+    private val songCache: SongCache
 ) {
 
     fun getSongs(): List<Song> {
@@ -73,6 +74,12 @@ class MusicRepository(
             }
         }
 
+        songCache.saveSongs(songs)
+
         return songs
+    }
+
+    fun getCachedSongs(): List<Song> {
+        return songCache.getSongs()
     }
 }

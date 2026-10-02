@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musiczone.data.MusicRepository
+import com.example.musiczone.data.SongCache
 import com.example.musiczone.model.Song
 import com.example.musiczone.playback.MusicController
 import kotlinx.coroutines.Dispatchers
@@ -19,8 +20,10 @@ class MusicViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
+    private val songCache = SongCache(application)
     private val repository = MusicRepository(
-        application.contentResolver
+        contentResolver = application.contentResolver,
+        songCache = songCache
     )
 
     private val musicController = MusicController(
@@ -93,9 +96,21 @@ class MusicViewModel(
     fun loadSongs() {
         viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
+            val cachedSongs = repository.getCachedSongs()
+
+            if(cachedSongs.isNotEmpty()){
+                _songs.value = cachedSongs
+                _isLoading.value = false
+            } else {
+                _isLoading.value = true
+            }
 
             try {
-                _songs.value = repository.getSongs()
+                val freshSongs = repository.getSongs()
+
+                if (freshSongs != cachedSongs){
+                    _songs.value = freshSongs
+                }
             } finally {
                 _isLoading.value = false
             }
