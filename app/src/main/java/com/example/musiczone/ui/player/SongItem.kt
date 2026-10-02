@@ -44,12 +44,17 @@ import com.example.musiczone.ui.theme.MusicZoneTextPrimary
 import com.example.musiczone.ui.theme.MusicZoneTextSecondary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import com.example.musiczone.ui.theme.MusicZonePurple
 
 @Composable
 public fun SongItem(
     song: Song,
     onClick: () -> Unit,
-    onPlay: () -> Unit
+    onPlay: () -> Unit,
+    isFavorite: Boolean,
+    onFavorite: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -137,12 +142,42 @@ public fun SongItem(
             )
         }
 
+        Spacer(modifier = Modifier.height(2.dp))
+
+        IconButton(
+            onClick = onFavorite
+        ) {
+            Icon(
+                imageVector = if (isFavorite) {
+                    Icons.Filled.Favorite
+                } else {
+                    Icons.Outlined.FavoriteBorder
+                },
+                contentDescription = if (isFavorite) {
+                    "Remove from favorites"
+                } else {
+                    "Add to favorites"
+                },
+                tint = if (isFavorite) {
+                    MusicZonePurple
+                } else {
+                    MusicZoneTextSecondary
+                }
+            )
+        }
+
         // Menu
         var menuExpanded by remember {
             mutableStateOf(false)
         }
 
+        Spacer(modifier = Modifier.height(2.dp))
+
         Box {
+
+
+
+
             IconButton(
                 onClick = {
                     menuExpanded = true

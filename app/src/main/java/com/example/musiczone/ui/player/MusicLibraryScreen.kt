@@ -65,7 +65,8 @@ public fun MusicLibraryScreen(
     ) {
         composable(ROUTE_LIBRARY) {
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 when {
@@ -136,7 +137,7 @@ public fun MusicLibraryScreen(
                             )
                         )
 
-
+                        val favoriteSongIds by viewModel.favoriteSongIds.collectAsState()
                         if (filteredSongs.isEmpty()) {
                             Text(
                                 text = "No matching songs",
@@ -159,6 +160,10 @@ public fun MusicLibraryScreen(
                                         },
                                         onPlay = {
                                             viewModel.playSong(song)
+                                        },
+                                        isFavorite = song.id in favoriteSongIds,
+                                        onFavorite = {
+                                            viewModel.toggleFavorite(song.id)
                                         }
                                     )
                                 }
@@ -230,6 +235,10 @@ public fun MusicLibraryScreen(
                     },
                     onBack = {
                         navController.popBackStack()
+                    },
+                    isFavorite = viewModel.isFavorite(song.id),
+                    onFavorite = {
+                        viewModel.toggleFavorite(song.id)
                     }
                 )
             }

@@ -76,6 +76,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 
 private val FallbackBackgroundColors = listOf(
     Color(0xFF24143D),
@@ -99,7 +101,9 @@ fun NowPlayingScreen(
     onSeek: (Long) -> Unit,
     onShuffle: () -> Unit,
     onRepeat: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    isFavorite: Boolean,
+    onFavorite: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -570,6 +574,32 @@ fun NowPlayingScreen(
                                 MusicZoneTextSecondary
                             },
                             modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    Spacer(
+                        modifier = Modifier.width(32.dp)
+                    )
+
+                    IconButton(
+                        onClick = onFavorite
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) {
+                                Icons.Filled.Favorite
+                            } else {
+                                Icons.Outlined.FavoriteBorder
+                            },
+                            contentDescription = if (isFavorite) {
+                                "Remove from favorites"
+                            } else {
+                                "Add to favorites"
+                            },
+                            tint = if (isFavorite) {
+                                MusicZonePurple
+                            } else {
+                                MusicZoneTextSecondary
+                            }
                         )
                     }
                 }

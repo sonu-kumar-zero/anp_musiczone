@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import com.example.musiczone.data.FavoritesRepository
 
 class MusicViewModel(
     application: Application
@@ -26,9 +27,12 @@ class MusicViewModel(
         songCache = songCache
     )
 
-    private val musicController = MusicController(
-        application
-    )
+    private val favoritesRepository = FavoritesRepository(application)
+
+    private val _favoriteSongIds = MutableStateFlow<Set<Long>>(emptySet())
+    val favoriteSongIds: StateFlow<Set<Long>> = _favoriteSongIds.asStateFlow()
+
+    private val musicController = MusicController(application)
 
     val isPlaying: StateFlow<Boolean> = musicController.isPlaying
 
@@ -78,6 +82,8 @@ class MusicViewModel(
 
     init {
         viewModelScope.launch {
+            _favoriteSongIds.value = favoritesRepository.getFavoriteIds()
+
             musicController.currentMediaItem.collect { mediaItem ->
                 if (mediaItem == null) {
                     _currentSong.value = null
@@ -98,7 +104,7 @@ class MusicViewModel(
             _isLoading.value = true
             val cachedSongs = repository.getCachedSongs()
 
-            if(cachedSongs.isNotEmpty()){
+            if (cachedSongs.isNotEmpty()) {
                 _songs.value = cachedSongs
                 _isLoading.value = false
             } else {
@@ -108,7 +114,7 @@ class MusicViewModel(
             try {
                 val freshSongs = repository.getSongs()
 
-                if (freshSongs != cachedSongs){
+                if (freshSongs != cachedSongs) {
                     _songs.value = freshSongs
                 }
             } finally {
@@ -168,8 +174,21 @@ class MusicViewModel(
         _searchQuery.value = query
     }
 
+    fun toggleFavorite(songId: Long) {
+        val isFavorite = favoritesRepository.toggleFavorite(songId)
+
+        _favoriteSongIds.value = if (isFavorite) {
+            _favoriteSongIds.value + songId
+        } else {
+            _favoriteSongIds.value - songId
+        }
+    }
+
+    fun isFavorite(songId: Long): Boolean {
+        return _favoriteSongIds.value.contains(songId)
+    }
+
     override fun onCleared() {
         musicController.release()
-        super.onCleared()
     }
 }
