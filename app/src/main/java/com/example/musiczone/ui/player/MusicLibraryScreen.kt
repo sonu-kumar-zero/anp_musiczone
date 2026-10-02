@@ -56,18 +56,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.draw.clip
-import androidx.media3.container.MdtaMetadataEntry
+import androidx.compose.foundation.layout.width
 
 private const val ROUTE_LIBRARY = "library"
 private const val ROUTE_NOW_PLAYING = "now_playing"
 
 @Composable
-public fun MusicLibraryScreen(
+fun MusicLibraryScreen(
     viewModel: MusicViewModel = viewModel()
 ) {
     val navController = rememberNavController()
@@ -78,6 +77,7 @@ public fun MusicLibraryScreen(
     var selectedAlbum by remember {
         mutableStateOf<String?>(null)
     }
+    var selectedArtist by remember { mutableStateOf<String?>(null) }
 
     val songs by viewModel.songs.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -241,10 +241,148 @@ public fun MusicLibraryScreen(
                                     }
 
                                     LibraryTab.ARTISTS -> {
-                                        Text(
-                                            text = "Albums coming soon",
-                                            modifier = Modifier.padding(16.dp)
-                                        )
+                                        val artists = songs
+                                            .filter { it.artist.isNotBlank() }
+                                            .groupBy { it.artist }
+
+                                        if (selectedArtist == null) {
+                                            if (artists.isEmpty()) {
+                                                Text(
+                                                    text = "No artists found",
+                                                    modifier = Modifier.padding(16.dp)
+                                                )
+                                            } else {
+                                                LazyColumn(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentPadding = PaddingValues(
+                                                        horizontal = 12.dp,
+                                                        vertical = 8.dp
+                                                    ),
+                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    items(
+                                                        items = artists.entries.toList(),
+                                                        key = { entry -> entry.key }
+                                                    ) { entry ->
+                                                        val artist = entry.key
+                                                        val artistSongs = entry.value
+
+                                                        Card(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .clickable {
+                                                                    selectedArtist = artist
+                                                                },
+                                                            shape = RoundedCornerShape(14.dp),
+                                                            colors = CardDefaults.cardColors(
+                                                                containerColor = MusicZoneSurface
+                                                            ),
+                                                            elevation = CardDefaults.cardElevation(
+                                                                defaultElevation = 2.dp
+                                                            )
+                                                        ) {
+                                                            Row(
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .padding(16.dp),
+                                                                verticalAlignment = Alignment.CenterVertically
+                                                            ) {
+                                                                Icon(
+                                                                    imageVector = Icons.Default.Person,
+                                                                    contentDescription = null,
+                                                                    tint = MusicZonePurple
+                                                                )
+
+                                                                Spacer(
+                                                                    modifier = Modifier.width(16.dp)
+                                                                )
+
+                                                                Column(
+                                                                    modifier = Modifier.weight(1f)
+                                                                ) {
+                                                                    Text(
+                                                                        text = artist,
+                                                                        style = MaterialTheme.typography.titleMedium,
+                                                                        color = MusicZoneTextPrimary,
+                                                                        maxLines = 1,
+                                                                        overflow = TextOverflow.Ellipsis
+                                                                    )
+
+                                                                    Spacer(
+                                                                        modifier = Modifier.height(2.dp)
+                                                                    )
+
+                                                                    Text(
+                                                                        text = "${artistSongs.size} songs",
+                                                                        style = MaterialTheme.typography.bodySmall,
+                                                                        color = MusicZoneTextSecondary
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            val artistSongs = artists[selectedArtist].orEmpty()
+
+                                            Column(
+                                                modifier = Modifier.fillMaxSize()
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(
+                                                            horizontal = 8.dp,
+                                                            vertical = 8.dp
+                                                        ),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    IconButton(
+                                                        onClick = {
+                                                            selectedArtist = null
+                                                        }
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                            contentDescription = "Back to artists",
+                                                            tint = MusicZoneTextPrimary
+                                                        )
+                                                    }
+
+                                                    Text(
+                                                        text = selectedArtist.orEmpty(),
+                                                        style = MaterialTheme.typography.headlineSmall,
+                                                        color = MusicZoneTextPrimary,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
+                                                    )
+                                                }
+
+                                                LazyColumn(
+                                                    modifier = Modifier.weight(1f)
+                                                ) {
+                                                    items(
+                                                        items = artistSongs,
+                                                        key = { song -> song.id }
+                                                    ) { song ->
+                                                        SongItem(
+                                                            song = song,
+                                                            onClick = {
+                                                                viewModel.playSong(song)
+                                                            },
+                                                            onPlay = {
+                                                                viewModel.playSong(song)
+                                                            },
+                                                            isFavorite = song.id in favoriteSongIds,
+                                                            onFavorite = {
+                                                                viewModel.toggleFavorite(song.id)
+                                                            }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
 
                                     LibraryTab.ALBUMS -> {
