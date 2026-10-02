@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musiczone.data.MusicRepository
 import com.example.musiczone.model.Song
-import com.example.musiczone.playback.MusicPlayer
+import com.example.musiczone.playback.MusicController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +20,7 @@ class MusicViewModel(
         application.contentResolver
     )
 
-    private val musicPlayer = MusicPlayer(application)
+    private val musicController = MusicController(application)
 
     private val _songs = MutableStateFlow<List<Song>>(emptyList())
     val songs: StateFlow<List<Song>> = _songs.asStateFlow()
@@ -41,11 +41,21 @@ class MusicViewModel(
     }
 
     fun playSong(song: Song) {
-        musicPlayer.play(song)
+        val currentSongs = _songs.value
+        val startIndex = currentSongs.indexOfFirst { it.id == song.id }
+
+        if (startIndex == -1) {
+            return
+        }
+
+        musicController.play(
+            currentSongs,
+            startIndex
+        )
     }
 
     override fun onCleared() {
-        musicPlayer.release()
+        musicController.release()
         super.onCleared()
     }
 }
