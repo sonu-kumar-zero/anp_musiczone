@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.MusicZone" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Normal application theme -->
+    <style name="Theme.MusicZone" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Keep your existing theme attributes here -->
+    </style>
+
+    <!-- Splash screen theme -->
+    <style name="Theme.MusicZone.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/musiczone_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/musiczone_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.MusicZone</item>
+    </style>
+
 </resources>

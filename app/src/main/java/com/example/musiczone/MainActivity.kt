@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.musiczone.data.MusicPermission
 import com.example.musiczone.ui.player.MusicLibraryScreen
 import com.example.musiczone.ui.theme.MusicZoneTheme
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         hasPermission = MusicPermission.isGranted(this)
