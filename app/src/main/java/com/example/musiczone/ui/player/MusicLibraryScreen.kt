@@ -56,11 +56,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 
 private const val ROUTE_LIBRARY = "library"
 private const val ROUTE_NOW_PLAYING = "now_playing"
@@ -284,14 +287,29 @@ fun MusicLibraryScreen(
                                                             Row(
                                                                 modifier = Modifier
                                                                     .fillMaxWidth()
-                                                                    .padding(16.dp),
+                                                                    .padding(
+                                                                        horizontal = 16.dp,
+                                                                        vertical = 12.dp
+                                                                    ),
                                                                 verticalAlignment = Alignment.CenterVertically
                                                             ) {
-                                                                Icon(
-                                                                    imageVector = Icons.Default.Person,
-                                                                    contentDescription = null,
-                                                                    tint = MusicZonePurple
-                                                                )
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .size(52.dp)
+                                                                        .clip(CircleShape)
+                                                                        .background(MusicZoneElevated),
+                                                                    contentAlignment = Alignment.Center
+                                                                ) {
+                                                                    Text(
+                                                                        text = artist
+                                                                            .trim()
+                                                                            .firstOrNull()
+                                                                            ?.uppercase()
+                                                                            ?: "?",
+                                                                        style = MaterialTheme.typography.titleLarge,
+                                                                        color = MusicZonePurple
+                                                                    )
+                                                                }
 
                                                                 Spacer(
                                                                     modifier = Modifier.width(16.dp)
@@ -309,7 +327,7 @@ fun MusicLibraryScreen(
                                                                     )
 
                                                                     Spacer(
-                                                                        modifier = Modifier.height(2.dp)
+                                                                        modifier = Modifier.height(3.dp)
                                                                     )
 
                                                                     Text(
@@ -318,6 +336,12 @@ fun MusicLibraryScreen(
                                                                         color = MusicZoneTextSecondary
                                                                     )
                                                                 }
+
+                                                                Icon(
+                                                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                                                    contentDescription = "Open artist",
+                                                                    tint = MusicZoneTextSecondary
+                                                                )
                                                             }
                                                         }
                                                     }
