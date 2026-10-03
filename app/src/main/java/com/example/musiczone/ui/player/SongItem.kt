@@ -1,9 +1,5 @@
 package com.example.musiczone.ui.player
 
-import android.graphics.Bitmap
-import android.os.Build
-import android.util.Size
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -25,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,28 +28,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.theme.MusicZoneElevated
 import com.example.musiczone.ui.theme.MusicZoneTextPrimary
 import com.example.musiczone.ui.theme.MusicZoneTextSecondary
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.PlaylistAdd
-import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.musiczone.ui.theme.MusicZonePurple
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
+import com.example.musiczone.ui.components.AlbumArtwork
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -68,27 +57,6 @@ fun SongItem(
     onRemoveFromGroup: (() -> Unit)? = null,
     onAddToQueue: () -> Unit
 ) {
-    val context = LocalContext.current
-
-    var bitmap by remember(song.uri) {
-        mutableStateOf<Bitmap?>(null)
-    }
-
-    LaunchedEffect(song.uri) {
-        bitmap = withContext(Dispatchers.IO) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    context.contentResolver.loadThumbnail(
-                        song.uri, Size(160, 160), null
-                    )
-                } else {
-                    null
-                }
-            } catch (_: Exception) {
-                null
-            }
-        }
-    }
 
     Row(
         modifier = Modifier
@@ -100,29 +68,15 @@ fun SongItem(
     ) {
 
         // Album artwork
-        if (bitmap != null) {
-            Image(
-                bitmap = bitmap!!.asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MusicZoneElevated), contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "♪",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MusicZoneTextSecondary
-                )
-            }
-        }
+
+        AlbumArtwork(
+            song = song,
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(MusicZoneElevated)
+        )
+
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -224,86 +178,64 @@ fun SongItem(
                             )
                         )
 
-                        ListItem(
-                            leadingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = null
-                                )
-                            },
-                            headlineContent = {
-                                Text("Play")
-                            },
-                            modifier = Modifier.clickable {
-                                menuExpanded = false
-                                onPlay()
-                            }
-                        )
+                        ListItem(leadingContent = {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow, contentDescription = null
+                            )
+                        }, headlineContent = {
+                            Text("Play")
+                        }, modifier = Modifier.clickable {
+                            menuExpanded = false
+                            onPlay()
+                        })
 
-                        ListItem(
-                            leadingContent = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.QueueMusic,
-                                    contentDescription = null
-                                )
-                            },
-                            headlineContent = {
-                                Text("Add to queue")
-                            },
-                            modifier = Modifier.clickable {
-                                menuExpanded = false
-                                onAddToQueue()
-                            }
-                        )
+                        ListItem(leadingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                                contentDescription = null
+                            )
+                        }, headlineContent = {
+                            Text("Add to queue")
+                        }, modifier = Modifier.clickable {
+                            menuExpanded = false
+                            onAddToQueue()
+                        })
 
-                        ListItem(
-                            leadingContent = {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
-                                    contentDescription = null
-                                )
-                            },
-                            headlineContent = {
-                                Text("Add to group")
-                            },
-                            modifier = Modifier.clickable {
-                                menuExpanded = false
-                                onAddToGroup()
-                            }
-                        )
+                        ListItem(leadingContent = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
+                                contentDescription = null
+                            )
+                        }, headlineContent = {
+                            Text("Add to group")
+                        }, modifier = Modifier.clickable {
+                            menuExpanded = false
+                            onAddToGroup()
+                        })
 
                         if (onRemoveFromGroup != null) {
-                            ListItem(
-                                leadingContent = {
-                                    Icon(
-                                        imageVector = Icons.Default.RemoveCircleOutline,
-                                        contentDescription = null
-                                    )
-                                },
-                                headlineContent = {
-                                    Text("Remove from group")
-                                },
-                                modifier = Modifier.clickable {
-                                    menuExpanded = false
-                                    onRemoveFromGroup()
-                                }
-                            )
-                        }
-
-                        ListItem(
-                            leadingContent = {
+                            ListItem(leadingContent = {
                                 Icon(
-                                    imageVector = Icons.Default.Info,
+                                    imageVector = Icons.Default.RemoveCircleOutline,
                                     contentDescription = null
                                 )
-                            },
-                            headlineContent = {
-                                Text("Song info")
-                            },
-                            modifier = Modifier.clickable {
+                            }, headlineContent = {
+                                Text("Remove from group")
+                            }, modifier = Modifier.clickable {
                                 menuExpanded = false
-                            }
-                        )
+                                onRemoveFromGroup()
+                            })
+                        }
+
+                        ListItem(leadingContent = {
+                            Icon(
+                                imageVector = Icons.Default.Info, contentDescription = null
+                            )
+                        }, headlineContent = {
+                            Text("Song info")
+                        }, modifier = Modifier.clickable {
+                            menuExpanded = false
+                        })
                     }
                 }
             }

@@ -17,6 +17,8 @@ navigationCompose = "2.10.2"
 room = "2.8.4"
 ksp = "2.0.21-1.0.28"
 reorderable = "2.5.1"
+retrofit = "3.0.0"
+okhttp = "5.3.0"
 
 [libraries]
 androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
@@ -46,6 +48,9 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+coil-network = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

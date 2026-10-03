@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.musiczone.model.Song
+import com.example.musiczone.ui.components.AlbumArtwork
 import com.example.musiczone.ui.theme.MusicZoneElevated
 import com.example.musiczone.ui.theme.MusicZonePurple
 import com.example.musiczone.ui.theme.MusicZoneSurface

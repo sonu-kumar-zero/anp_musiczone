@@ -73,4 +73,7 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.reorderable)
+    implementation(libs.retrofit)
+    implementation(libs.okhttp)
+    implementation(libs.coil.network)
 }

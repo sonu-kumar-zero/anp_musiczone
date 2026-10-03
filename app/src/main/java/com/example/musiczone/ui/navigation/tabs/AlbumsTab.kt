@@ -34,19 +34,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.MusicViewModel
+import com.example.musiczone.ui.components.AlbumArtwork
 import com.example.musiczone.ui.components.MusicZoneHeader
-import com.example.musiczone.ui.player.AlbumArtwork
 import com.example.musiczone.ui.player.SongItem
 import com.example.musiczone.ui.theme.MusicZoneSurface
 import com.example.musiczone.ui.theme.MusicZoneTextPrimary
 import com.example.musiczone.ui.theme.MusicZoneTextSecondary
 import kotlin.collections.get
 import kotlin.collections.orEmpty
+
 
 @Composable
 fun AlbumsTab(

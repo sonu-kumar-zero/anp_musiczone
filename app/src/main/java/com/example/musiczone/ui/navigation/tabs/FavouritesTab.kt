@@ -62,8 +62,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import com.example.musiczone.ui.components.AlbumArtwork
 import com.example.musiczone.ui.components.MusicZoneHeader
-import com.example.musiczone.ui.player.AlbumArtwork
 import com.example.musiczone.ui.theme.MusicZoneSurface
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -179,7 +179,8 @@ fun FavoritesTab(
 
                                     if (firstSong != null) {
                                         AlbumArtwork(
-                                            song = firstSong, modifier = Modifier.fillMaxSize()
+                                            song = firstSong,
+                                            modifier = Modifier.fillMaxSize()
                                         )
                                     } else {
                                         Box(
@@ -363,7 +364,7 @@ fun FavoritesTab(
                             items = groupSongs, key = { song -> song.id }) { song ->
                             SongItem(
                                 song = song, onClick = {
-                                viewModel.playSong(song, groupSongs)
+                                    viewModel.playSong(song, groupSongs)
                                 }, onPlay = {
                                     viewModel.playSong(song, groupSongs)
                                 }, isFavorite = viewModel.isFavorite(song.id), onFavorite = {

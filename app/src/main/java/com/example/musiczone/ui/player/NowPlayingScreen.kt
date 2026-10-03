@@ -78,6 +78,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import com.example.musiczone.ui.components.AlbumArtwork
 
 private val FallbackBackgroundColors = listOf(
     Color(0xFF24143D), Color(0xFF142B4A), Color(0xFF123A3A), Color(0xFF3D2914), Color(0xFF3D1829)
@@ -582,49 +583,6 @@ fun NowPlayingScreen(
     }
 }
 
-@Composable
-fun AlbumArtwork(
-    song: Song, modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-
-    var bitmap by remember(song.uri) {
-        mutableStateOf<Bitmap?>(null)
-    }
-
-    LaunchedEffect(song.uri) {
-        bitmap = withContext(Dispatchers.IO) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    context.contentResolver.loadThumbnail(
-                        song.uri, Size(800, 800), null
-                    )
-                } else {
-                    null
-                }
-            } catch (_: Exception) {
-                null
-            }
-        }
-    }
-
-    if (bitmap != null) {
-        Image(
-            bitmap = bitmap!!.asImageBitmap(),
-            contentDescription = "Album artwork",
-            modifier = modifier,
-            contentScale = ContentScale.Crop
-        )
-    } else {
-        BoxWithConstraints(
-            modifier = modifier.background(MusicZoneElevated), contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "♪", color = MusicZonePurple, fontSize = (maxWidth.value * 0.45f).sp
-            )
-        }
-    }
-}
 
 private fun formatTime(milliseconds: Long): String {
     val totalSeconds = max(0L, milliseconds) / 1000

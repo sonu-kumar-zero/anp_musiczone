@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.MusicViewModel
+import com.example.musiczone.ui.components.AlbumArtwork
 import com.example.musiczone.ui.components.MusicZoneHeader
 import com.example.musiczone.ui.player.SongItem
 import com.example.musiczone.ui.theme.MusicZoneElevated
@@ -52,7 +54,9 @@ import kotlin.collections.orEmpty
 
 @Composable
 fun ArtistsTab(
-    songs: List<Song>, viewModel: MusicViewModel, favoriteSongIds: Set<Long>,
+    songs: List<Song>,
+    viewModel: MusicViewModel,
+    favoriteSongIds: Set<Long>,
     onAddToGroup: (Song) -> Unit
 ) {
     val artists = songs.filter { it.artist.isNotBlank() }.groupBy { it.artist }
@@ -69,8 +73,7 @@ fun ArtistsTab(
 
         Column() {
             MusicZoneHeader(
-                title = "Artists",
-                subtitle = "Your Music Artists"
+                title = "Artists", subtitle = "Your Music Artists"
             )
 
             if (artists.isEmpty()) {
@@ -88,6 +91,7 @@ fun ArtistsTab(
                         items = artists.entries.toList(), key = { entry -> entry.key }) { entry ->
                         val artist = entry.key
                         val artistSongs = entry.value
+                        val firstSong = artistSongs.firstOrNull()
 
                         Card(
                             modifier = Modifier
@@ -110,19 +114,32 @@ fun ArtistsTab(
                                         horizontal = 16.dp, vertical = 12.dp
                                     ), verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(52.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            MusicZoneElevated
-                                        ), contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = artist.trim().firstOrNull()?.uppercase() ?: "?",
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = MusicZonePurple
+
+                                if (firstSong != null) {
+                                    AlbumArtwork(
+                                        song = firstSong, modifier = Modifier
+                                            .size(52.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                MusicZoneElevated
+                                            )
                                     )
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(52.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                MusicZoneElevated
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = artist.trim().firstOrNull()?.uppercase() ?: "?",
+                                            style = MaterialTheme.typography.titleLarge,
+                                            color = MusicZonePurple
+                                        )
+                                    }
                                 }
 
                                 Spacer(
