@@ -45,6 +45,7 @@ import com.example.musiczone.model.Song
 private const val ROUTE_LIBRARY = "library"
 private const val ROUTE_NOW_PLAYING = "now_playing"
 
+
 @Composable
 fun MusicLibraryScreen(
     viewModel: MusicViewModel = viewModel()
@@ -77,6 +78,9 @@ fun MusicLibraryScreen(
     val filteredSongs by viewModel.filteredSongs.collectAsState()
     val favoriteSongIds by viewModel.favoriteSongIds.collectAsState()
     val favoriteGroups by viewModel.favoriteGroups.collectAsState()
+    val queue by viewModel.queue.collectAsState()
+    val currentMediaItem by viewModel.currentMediaItem.collectAsState()
+    var showQueue by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadSongs()
@@ -299,7 +303,27 @@ fun MusicLibraryScreen(
 
                     onFavorite = {
                         viewModel.toggleFavorite(song.id)
-                    })
+                    },
+                    onQueueClick = {
+                        showQueue = true
+                    }
+                )
+
+                if (showQueue) {
+                    QueueScreen(
+                        queue = queue,
+                        currentMediaItem = currentMediaItem,
+                        onRemove = { index ->
+                            viewModel.removeFromQueue(index)
+                        },
+                        onDismiss = {
+                            showQueue = false
+                        },
+                        onMove = { fromIndex, toIndex ->
+                            viewModel.moveInQueue(fromIndex, toIndex)
+                        }
+                    )
+                }
             }
         }
     }

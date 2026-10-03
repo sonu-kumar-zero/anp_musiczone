@@ -3,6 +3,7 @@ package com.example.musiczone.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
 import com.example.musiczone.data.MusicRepository
 import com.example.musiczone.data.SongCache
 import com.example.musiczone.model.Song
@@ -25,6 +26,7 @@ class MusicViewModel(
 
     private val favoriteGroupSongFlows = mutableMapOf<Long, StateFlow<List<Long>>>()
 
+
     private val songCache = SongCache(application)
     private val repository = MusicRepository(
         contentResolver = application.contentResolver, songCache = songCache
@@ -43,6 +45,9 @@ class MusicViewModel(
 
     val isPlaying: StateFlow<Boolean> = musicController.isPlaying
 
+    val currentMediaItem: StateFlow<MediaItem?> =
+        musicController.currentMediaItem
+
     private val _songs = MutableStateFlow<List<Song>>(emptyList())
     val songs: StateFlow<List<Song>> = _songs.asStateFlow()
 
@@ -59,6 +64,7 @@ class MusicViewModel(
 
     val repeatMode: StateFlow<Int> = musicController.repeatMode
 
+    val queue: StateFlow<List<MediaItem>> = musicController.queue
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -325,6 +331,18 @@ class MusicViewModel(
             val groupIds = favoriteGroupsRepository.getGroupIdsForSong(songId)
             onResult(groupIds.toSet())
         }
+    }
+
+    fun removeFromQueue(index: Int) {
+        musicController.removeFromQueue(index)
+    }
+
+    fun clearQueue() {
+        musicController.clearQueue()
+    }
+
+    fun moveInQueue(fromIndex: Int, toIndex: Int) {
+        musicController.moveInQueue(fromIndex, toIndex)
     }
 
     override fun onCleared() {

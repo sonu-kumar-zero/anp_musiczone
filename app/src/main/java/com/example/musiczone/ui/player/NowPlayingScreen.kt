@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
@@ -76,6 +74,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 
@@ -104,6 +105,7 @@ fun NowPlayingScreen(
     onBack: () -> Unit,
     isFavorite: Boolean,
     onFavorite: () -> Unit,
+    onQueueClick: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -244,7 +246,7 @@ fun NowPlayingScreen(
                         onClick = onBack
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = MusicZoneTextPrimary
                         )
@@ -600,6 +602,20 @@ fun NowPlayingScreen(
                             } else {
                                 MusicZoneTextSecondary
                             }
+                        )
+                    }
+
+                    Spacer(
+                        modifier = Modifier.width(32.dp)
+                    )
+
+                    IconButton(
+                        onClick = onQueueClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                            contentDescription = "Queue",
+                            tint = MusicZoneTextSecondary
                         )
                     }
                 }

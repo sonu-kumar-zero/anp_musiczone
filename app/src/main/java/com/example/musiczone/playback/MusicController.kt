@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.example.musiczone.model.Song
@@ -24,6 +25,9 @@ import kotlin.time.Duration.Companion.milliseconds
 class MusicController(
     private val context: Context
 ) {
+
+    private val _queue = MutableStateFlow<List<MediaItem>>(emptyList())
+    val queue: StateFlow<List<MediaItem>> = _queue.asStateFlow()
 
     private val _currentMediaItem = MutableStateFlow<MediaItem?>(null)
     val currentMediaItem: StateFlow<MediaItem?> = _currentMediaItem.asStateFlow()
@@ -80,6 +84,10 @@ class MusicController(
         ) {
             _repeatMode.value = repeatMode
         }
+
+        override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+            updateQueue()
+        }
     }
 
     fun togglePlayPause() {
@@ -119,6 +127,8 @@ class MusicController(
                 controller?.setMediaItems(
                     mediaItems, startIndex, 0L
                 )
+
+                updateQueue()
 
                 _currentMediaItem.value = mediaItems[startIndex]
 
@@ -178,12 +188,43 @@ class MusicController(
 
     fun addToQueue(song: Song) {
         val mediaItem =
-            MediaItem.Builder().setMediaId(song.id.toString()).setUri(song.uri).setMediaMetadata(
-                    MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist)
-                        .setAlbumTitle(song.album).build()
+            MediaItem.Builder()
+                .setMediaId(song.id.toString())
+                .setUri(song.uri)
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(song.title)
+                        .setArtist(song.artist)
+                        .setAlbumTitle(song.album)
+                        .build()
                 ).build()
 
         controller?.addMediaItem(mediaItem)
+
+        updateQueue()
+    }
+
+    private fun updateQueue() {
+        val mediaController = controller ?: return
+
+        _queue.value = List(mediaController.mediaItemCount) { index ->
+            mediaController.getMediaItemAt(index)
+        }
+    }
+
+    fun removeFromQueue(index: Int) {
+        controller?.removeMediaItem(index)
+        updateQueue()
+    }
+
+    fun clearQueue() {
+        controller?.clearMediaItems()
+        updateQueue()
+    }
+
+    fun moveInQueue(fromIndex: Int, toIndex: Int) {
+        controller?.moveMediaItem(fromIndex, toIndex)
+        updateQueue()
     }
 
     fun release() {
