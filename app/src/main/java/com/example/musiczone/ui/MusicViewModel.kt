@@ -108,8 +108,6 @@ class MusicViewModel(
 
             _favoriteSongIds.value = favoriteIds
 
-            favoriteGroupsRepository.ensureDefaultGroup()
-
             val favoritesGroup =
                 favoriteGroupsRepository.getGroupByName("Favorites")
 

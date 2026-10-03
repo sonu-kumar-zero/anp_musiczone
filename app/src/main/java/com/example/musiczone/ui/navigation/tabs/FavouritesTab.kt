@@ -1,19 +1,29 @@
 package com.example.musiczone.ui.navigation.tabs
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -36,14 +46,25 @@ import androidx.compose.ui.unit.dp
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.MusicViewModel
 import com.example.musiczone.ui.player.SongItem
-import com.example.musiczone.ui.theme.MusicZoneElevated
 import com.example.musiczone.ui.theme.MusicZonePurple
 import com.example.musiczone.ui.theme.MusicZoneTextPrimary
 import com.example.musiczone.ui.theme.MusicZoneTextSecondary
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
+import com.example.musiczone.ui.player.AlbumArtwork
+import com.example.musiczone.ui.theme.MusicZoneSurface
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesTab(
     songs: List<Song>, viewModel: MusicViewModel
@@ -68,6 +89,7 @@ fun FavoritesTab(
     var groupName by remember {
         mutableStateOf("")
     }
+    var groupOptionsId by remember { mutableStateOf<Long?>(null) }
 
     Column(
         modifier = Modifier
@@ -107,79 +129,205 @@ fun FavoritesTab(
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = 12.dp,
+                        vertical = 8.dp
+                    ),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(
-                        items = favoriteGroups, key = { group -> group.id }) { group ->
-                        var menuExpanded by remember(group.id) {
-                            mutableStateOf(false)
+                        items = favoriteGroups,
+                        key = { group -> group.id }
+                    ) { group ->
+
+                        val groupSongIds by viewModel
+                            .observeFavoriteGroupSongIds(group.id)
+                            .collectAsState()
+
+                        val groupSongs = songs.filter {
+                            it.id in groupSongIds
                         }
+
+                        val firstSong = groupSongs.firstOrNull()
+
                         Card(
-                            modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(
-                                containerColor = MusicZoneElevated
-                            ), onClick = {
-                                selectedGroupId = group.id
-                            }) {
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedGroupId = group.id
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MusicZoneSurface
+                            ),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = 2.dp
+                            )
+                        ) {
                             Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                modifier = Modifier.padding(10.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Favorite,
-                                    contentDescription = null,
-                                    tint = MusicZonePurple
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f)
+                                        .clip(
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                ) {
+
+                                    if (firstSong != null) {
+                                        AlbumArtwork(
+                                            song = firstSong,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    } else {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Favorite,
+                                                contentDescription = null,
+                                                tint = MusicZonePurple
+                                            )
+                                        }
+                                    }
+
+
+                                    IconButton(
+                                        onClick = {
+                                            groupOptionsId = group.id
+                                        },
+                                        modifier = Modifier.align(
+                                            Alignment.TopEnd
+                                        )
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            contentDescription = "Group options",
+                                            tint = MusicZoneTextPrimary
+                                        )
+                                    }
+                                }
+
+                                Spacer(
+                                    modifier = Modifier.height(10.dp)
                                 )
 
                                 Text(
                                     text = group.name,
+                                    style = MaterialTheme.typography.titleMedium,
                                     color = MusicZoneTextPrimary,
-                                    modifier = Modifier.padding(top = 12.dp)
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
 
-                                val groupSongIds by viewModel.observeFavoriteGroupSongIds(group.id)
-                                    .collectAsState()
+                                Spacer(
+                                    modifier = Modifier.height(2.dp)
+                                )
 
                                 Text(
                                     text = "${groupSongIds.size} songs",
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = MusicZoneTextSecondary,
-                                    modifier = Modifier.padding(top = 4.dp)
+                                    maxLines = 1
                                 )
+                            }
+                        }
+                    }
+                }
 
-                                IconButton(
-                                    onClick = {
-                                        menuExpanded = true
-                                    }) {
+                val optionsGroup = favoriteGroups.firstOrNull {
+                    it.id == groupOptionsId
+                }
+
+                if (optionsGroup != null) {
+                    ModalBottomSheet(
+                        onDismissRequest = {
+                            groupOptionsId = null
+                        },
+                        sheetState = rememberModalBottomSheetState(
+                            skipPartiallyExpanded = true
+                        ),
+                        containerColor = MusicZoneSurface
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 24.dp)
+                        ) {
+
+                            Text(
+                                text = optionsGroup.name,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MusicZoneTextPrimary,
+                                modifier = Modifier.padding(
+                                    horizontal = 24.dp,
+                                    vertical = 16.dp
+                                )
+                            )
+
+                            ListItem(
+                                modifier = Modifier.clickable {
+                                    groupOptionsId = null
+                                    groupToRename = optionsGroup.id
+                                    renameGroupName = optionsGroup.name
+                                },
+                                colors = ListItemDefaults.colors(
+                                    containerColor = Color.Transparent
+                                ),
+                                leadingContent = {
                                     Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        contentDescription = "Group options",
-                                        tint = MusicZoneTextSecondary
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = null,
+                                        tint = MusicZoneTextPrimary
+                                    )
+                                },
+                                headlineContent = {
+                                    Text(
+                                        text = "Rename",
+                                        color = MusicZoneTextPrimary
                                     )
                                 }
+                            )
 
-                                DropdownMenu(
-                                    expanded = menuExpanded, onDismissRequest = {
-                                        menuExpanded = false
-                                    }) {
-                                    DropdownMenuItem(text = {
-                                        Text("Rename")
-                                    }, onClick = {
-                                        menuExpanded = false
-                                        groupToRename = group.id
-                                        renameGroupName = group.name
-                                    })
-
-                                    DropdownMenuItem(
-                                        text = { Text("Delete") },
-                                        enabled = group.name != "Favorites",
-                                        onClick = {
-                                            menuExpanded = false
-                                            viewModel.deleteFavoriteGroup(group.id)
-                                        })
+                            ListItem(
+                                modifier = Modifier.clickable(
+                                    enabled = optionsGroup.name != "Favorites"
+                                ) {
+                                    groupOptionsId = null
+                                    viewModel.deleteFavoriteGroup(
+                                        optionsGroup.id
+                                    )
+                                },
+                                colors = ListItemDefaults.colors(
+                                    containerColor = Color.Transparent
+                                ),
+                                leadingContent = {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = if (optionsGroup.name == "Favorites") {
+                                            MusicZoneTextSecondary
+                                        } else {
+                                            MusicZoneTextPrimary
+                                        }
+                                    )
+                                },
+                                headlineContent = {
+                                    Text(
+                                        text = "Delete",
+                                        color = if (optionsGroup.name == "Favorites") {
+                                            MusicZoneTextSecondary
+                                        } else {
+                                            MusicZoneTextPrimary
+                                        }
+                                    )
                                 }
-                            }
+                            )
                         }
                     }
                 }
@@ -249,69 +397,175 @@ fun FavoritesTab(
     }
 
     if (showCreateDialog) {
-        AlertDialog(onDismissRequest = {
-            showCreateDialog = false
-        }, title = {
-            Text("New Favorite Group")
-        }, text = {
-            OutlinedTextField(value = groupName, onValueChange = {
-                groupName = it
-            }, singleLine = true, label = {
-                Text("Group name")
-            })
-        }, confirmButton = {
-            Button(
-                onClick = {
-                    viewModel.createFavoriteGroup(groupName)
-                    showCreateDialog = false
-                }, enabled = groupName.trim().isNotEmpty()
-            ) {
-                Text("Create")
+        val trimmedGroupName = groupName.trim()
+
+        AlertDialog(
+            onDismissRequest = {
+                showCreateDialog = false
+            },
+            containerColor = MusicZoneSurface,
+            shape = RoundedCornerShape(24.dp),
+            title = {
+                Text(
+                    text = "Create favorite group",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MusicZoneTextPrimary
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Create a new collection for your favorite songs.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MusicZoneTextSecondary
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(20.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = groupName,
+                        onValueChange = {
+                            groupName = it
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        label = {
+                            Text("Group name")
+                        },
+                        placeholder = {
+                            Text("e.g. Workout")
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Done
+                        )
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (trimmedGroupName != "Favorites") {
+                            viewModel.createFavoriteGroup(
+                                trimmedGroupName
+                            )
+                            groupName = ""
+                            showCreateDialog = false
+                        }
+                    },
+                    enabled = trimmedGroupName.isNotEmpty() && trimmedGroupName != "Favorites",
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MusicZonePurple
+                    )
+                ) {
+                    Text("Create")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showCreateDialog = false
+                        groupName = ""
+                    }
+                ) {
+                    Text(
+                        text = "Cancel",
+                        color = MusicZoneTextSecondary
+                    )
+                }
             }
-        }, dismissButton = {
-            TextButton(
-                onClick = {
-                    showCreateDialog = false
-                }) {
-                Text("Cancel")
-            }
-        })
+        )
     }
 
     if (groupToRename != null) {
-        AlertDialog(onDismissRequest = {
-            groupToRename = null
-        }, title = {
-            Text("Rename Favorite Group")
-        }, text = {
-            OutlinedTextField(value = renameGroupName, onValueChange = {
-                renameGroupName = it
-            }, singleLine = true, label = {
-                Text("Group name")
-            })
-        }, confirmButton = {
-            Button(
-                onClick = {
-                    val groupId = groupToRename
+        val trimmedGroupName = renameGroupName.trim()
 
-                    if (groupId != null) {
-                        viewModel.renameFavoriteGroup(
-                            groupId = groupId, name = renameGroupName
+        AlertDialog(
+            onDismissRequest = {
+                groupToRename = null
+            },
+            containerColor = MusicZoneSurface,
+            shape = RoundedCornerShape(24.dp),
+            title = {
+                Text(
+                    text = "Rename favorite group",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MusicZoneTextPrimary
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Choose a new name for this collection.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MusicZoneTextSecondary
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(20.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = renameGroupName,
+                        onValueChange = {
+                            renameGroupName = it
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        label = {
+                            Text("Group name")
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Done
                         )
-                    }
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val groupId = groupToRename
 
-                    groupToRename = null
-                }, enabled = renameGroupName.trim().isNotEmpty()
-            ) {
-                Text("Rename")
+                        if (groupId != null && trimmedGroupName != "Favorites") {
+                            viewModel.renameFavoriteGroup(
+                                groupId = groupId,
+                                name = trimmedGroupName
+                            )
+                        }
+
+                        groupToRename = null
+                        renameGroupName = ""
+                    },
+                    enabled = trimmedGroupName.isNotEmpty() && trimmedGroupName != "Favorites",
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MusicZonePurple
+                    )
+                ) {
+                    Text("Rename")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        groupToRename = null
+                        renameGroupName = ""
+                    }
+                ) {
+                    Text(
+                        text = "Cancel",
+                        color = MusicZoneTextSecondary
+                    )
+                }
             }
-        }, dismissButton = {
-            TextButton(
-                onClick = {
-                    groupToRename = null
-                }) {
-                Text("Cancel")
-            }
-        })
+        )
     }
 }
