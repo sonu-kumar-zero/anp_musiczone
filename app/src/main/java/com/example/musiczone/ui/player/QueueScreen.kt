@@ -35,6 +35,7 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ListItemDefaults
@@ -52,7 +53,8 @@ fun QueueScreen(
     onRemove: (Int) -> Unit,
     onMove: (Int, Int) -> Unit,
     onDismiss: () -> Unit,
-    onPlay: (Int) -> Unit
+    onPlay: (Int) -> Unit,
+    isPlaying: Boolean,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -143,13 +145,23 @@ fun QueueScreen(
                                     containerColor = Color.Transparent
                                 ),
                                 leadingContent = {
-                                    Icon(
-                                        imageVector = Icons.Default.DragHandle,
-                                        contentDescription = "Drag to reorder",
-                                        tint = MusicZoneTextSecondary,
-                                        modifier = Modifier
-                                            .size(28.dp)
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        if (isCurrent) {
+                                            PlayingWaveform(
+                                                isPlaying = isPlaying
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Default.DragHandle,
+                                                contentDescription = "Drag to reorder",
+                                                tint = MusicZoneTextSecondary,
+                                                modifier = Modifier.size(28.dp)
+                                            )
+                                        }
+                                    }
                                 },
                                 headlineContent = {
                                     Text(
@@ -169,14 +181,6 @@ fun QueueScreen(
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis
                                         )
-
-                                        if (isCurrent) {
-                                            Text(
-                                                text = "Playing",
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = MusicZonePurple
-                                            )
-                                        }
                                     }
                                 },
                                 trailingContent = {
