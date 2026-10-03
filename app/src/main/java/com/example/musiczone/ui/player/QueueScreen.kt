@@ -34,9 +34,11 @@ import androidx.compose.runtime.getValue
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import com.example.musiczone.ui.theme.MusicZoneElevated
@@ -49,7 +51,8 @@ fun QueueScreen(
     currentMediaItem: MediaItem?,
     onRemove: (Int) -> Unit,
     onMove: (Int, Int) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onPlay: (Int) -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -132,7 +135,10 @@ fun QueueScreen(
 
                             ListItem(
                                 modifier = Modifier
-                                    .longPressDraggableHandle(),
+                                    .longPressDraggableHandle()
+                                    .clickable {
+                                        onPlay(index)
+                                    },
                                 colors = ListItemDefaults.colors(
                                     containerColor = Color.Transparent
                                 ),

@@ -227,6 +227,11 @@ class MusicController(
         updateQueue()
     }
 
+    fun playQueueItem(index: Int) {
+        controller?.seekToDefaultPosition(index)
+        controller?.play()
+    }
+
     fun release() {
         positionJob?.cancel()
         controller?.removeListener(playerListener)

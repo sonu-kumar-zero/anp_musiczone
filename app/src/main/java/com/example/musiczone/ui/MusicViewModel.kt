@@ -345,6 +345,10 @@ class MusicViewModel(
         musicController.moveInQueue(fromIndex, toIndex)
     }
 
+    fun playQueueItem(index: Int){
+        musicController.playQueueItem(index)
+    }
+
     override fun onCleared() {
         musicController.release()
         favoriteGroupsRepository.close()

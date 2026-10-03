@@ -321,6 +321,9 @@ fun MusicLibraryScreen(
                         },
                         onMove = { fromIndex, toIndex ->
                             viewModel.moveInQueue(fromIndex, toIndex)
+                        },
+                        onPlay = {index ->
+                            viewModel.playQueueItem(index)
                         }
                     )
                 }
