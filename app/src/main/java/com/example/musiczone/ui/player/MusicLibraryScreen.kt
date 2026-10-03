@@ -136,6 +136,7 @@ fun MusicLibraryScreen(
                                                     .padding(horizontal = 16.dp)
                                             ) {
                                                 RecentSongsSection(
+                                                    modifier = Modifier.weight(1f),
                                                     songs = recentSongs,
                                                     onSongClick = { song ->
                                                         viewModel.playSong(song, recentSongs)
