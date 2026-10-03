@@ -54,10 +54,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.media3.common.Player
 import com.example.musiczone.model.Song
-import com.example.musiczone.ui.theme.MusicZoneElevated
 import com.example.musiczone.ui.theme.MusicZoneOnPrimary
 import com.example.musiczone.ui.theme.MusicZonePurple
 import com.example.musiczone.ui.theme.MusicZoneSurface
