@@ -26,6 +26,9 @@ class MusicController(
     private val context: Context
 ) {
 
+    private val _playedSongId = MutableStateFlow<Long?>(null)
+    val playedSongId: StateFlow<Long?> = _playedSongId.asStateFlow()
+
     private val _queue = MutableStateFlow<List<MediaItem>>(emptyList())
     val queue: StateFlow<List<MediaItem>> = _queue.asStateFlow()
 
@@ -63,6 +66,10 @@ class MusicController(
             mediaItem: MediaItem?, reason: Int
         ) {
             _currentMediaItem.value = mediaItem
+
+            _playedSongId.value = mediaItem
+                ?.mediaId
+                ?.toLongOrNull()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {

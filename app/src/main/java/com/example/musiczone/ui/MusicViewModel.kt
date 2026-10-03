@@ -20,6 +20,7 @@ import com.example.musiczone.data.FavoritesRepository
 import com.example.musiczone.data.FavoriteGroupsRepository
 import com.example.musiczone.data.local.FavoriteGroupEntity
 import com.example.musiczone.data.local.RecentSongRepository
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 
 class MusicViewModel(
@@ -93,6 +94,8 @@ class MusicViewModel(
     )
 
     init {
+        observePlayedSongs()
+
         viewModelScope.launch {
             musicController.currentMediaItem.collect { mediaItem ->
                 if (mediaItem == null) {
@@ -170,16 +173,9 @@ class MusicViewModel(
         }
 
         musicController.play(
-            songs, startIndex
+            songs,
+            startIndex
         )
-
-        viewModelScope.launch {
-            recentSongRepository.recordSongPlayed(song.id)
-
-            _recentSongs.update { recentSongs ->
-                listOf(song) + recentSongs.filter { it.id != song.id }
-            }
-        }
     }
 
     fun addToQueue(song: Song) {
@@ -366,6 +362,27 @@ class MusicViewModel(
                     song.id == songId
                 }
             }
+        }
+    }
+
+    private fun observePlayedSongs() {
+        viewModelScope.launch {
+            musicController.playedSongId
+                .filterNotNull()
+                .collect { songId ->
+
+                    val song = _songs.value.firstOrNull {
+                        it.id == songId
+                    } ?: return@collect
+
+                    recentSongRepository.recordSongPlayed(songId)
+
+                    _recentSongs.update { recentSongs ->
+                        listOf(song) + recentSongs.filter {
+                            it.id != song.id
+                        }
+                    }
+                }
         }
     }
 
