@@ -62,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import com.example.musiczone.ui.components.MusicZoneHeader
 import com.example.musiczone.ui.player.AlbumArtwork
 import com.example.musiczone.ui.theme.MusicZoneSurface
 
@@ -104,27 +105,20 @@ fun FavoritesTab(
             .padding(16.dp)
     ) {
         if (selectedGroupId == null) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Favorite Groups", color = MusicZoneTextPrimary
-                )
-
-                IconButton(
-                    onClick = {
-                        groupName = ""
-                        showCreateDialog = true
-                    }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Create favorite group",
-                        tint = MusicZonePurple
-                    )
-                }
-            }
+            MusicZoneHeader(
+                title = "Favorites", subtitle = "Your favorite music", actions = {
+                    IconButton(
+                        onClick = {
+                            groupName = ""
+                            showCreateDialog = true
+                        }) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Create favorite group",
+                            tint = MusicZonePurple
+                        )
+                    }
+                })
 
             if (favoriteGroups.isEmpty()) {
                 Text(

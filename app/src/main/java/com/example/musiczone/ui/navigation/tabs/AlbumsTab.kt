@@ -34,10 +34,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.MusicViewModel
+import com.example.musiczone.ui.components.MusicZoneHeader
 import com.example.musiczone.ui.player.AlbumArtwork
 import com.example.musiczone.ui.player.SongItem
 import com.example.musiczone.ui.theme.MusicZoneSurface
@@ -63,71 +65,82 @@ fun AlbumsTab(
     val albums = songs.filter { it.album.isNotBlank() }.groupBy { it.album }
 
     if (selectedAlbum == null) {
-        if (albums.isEmpty()) {
-            Text(
-                text = "No albums found", modifier = Modifier.padding(16.dp)
+
+        Column() {
+            MusicZoneHeader(
+                title = "Albums",
+                subtitle = "Your music collection"
             )
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    horizontal = 12.dp, vertical = 8.dp
-                ),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(
-                    items = albums.entries.toList(), key = { entry -> entry.key }) { entry ->
 
-                    val album = entry.key
-                    val albumSongs = entry.value
-                    val firstSong = albumSongs.first()
+            if (albums.isEmpty()) {
+                Text(
+                    text = "No albums found", modifier = Modifier.padding(16.dp)
+                )
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = 12.dp, vertical = 8.dp
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(
+                        items = albums.entries.toList(), key = { entry -> entry.key }) { entry ->
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedAlbum = album
-                            }, shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(
-                            containerColor = MusicZoneSurface
-                        ), elevation = CardDefaults.cardElevation(
-                            defaultElevation = 2.dp
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(10.dp)
+                        val album = entry.key
+                        val albumSongs = entry.value
+                        val firstSong = albumSongs.first()
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedAlbum = album
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MusicZoneSurface
+                            ),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = 2.dp
+                            )
                         ) {
-                            AlbumArtwork(
-                                song = firstSong,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                            )
+                            Column(
+                                modifier = Modifier.padding(10.dp)
+                            ) {
+                                AlbumArtwork(
+                                    song = firstSong,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(12.dp))
+                                )
 
-                            Spacer(
-                                modifier = Modifier.height(10.dp)
-                            )
+                                Spacer(
+                                    modifier = Modifier.height(10.dp)
+                                )
 
-                            Text(
-                                text = album,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MusicZoneTextPrimary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                                Text(
+                                    text = album,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MusicZoneTextPrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
 
-                            Spacer(
-                                modifier = Modifier.height(2.dp)
-                            )
+                                Spacer(
+                                    modifier = Modifier.height(2.dp)
+                                )
 
-                            Text(
-                                text = "${albumSongs.size} songs",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MusicZoneTextSecondary,
-                                maxLines = 1
-                            )
+                                Text(
+                                    text = "${albumSongs.size} songs",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MusicZoneTextSecondary,
+                                    maxLines = 1
+                                )
+                            }
                         }
                     }
                 }

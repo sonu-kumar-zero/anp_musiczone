@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.MusicViewModel
+import com.example.musiczone.ui.components.MusicZoneHeader
 import com.example.musiczone.ui.player.SongItem
 import com.example.musiczone.ui.theme.MusicZoneElevated
 import com.example.musiczone.ui.theme.MusicZonePurple
@@ -64,85 +65,97 @@ fun ArtistsTab(
 
 
     if (selectedArtist == null) {
-        if (artists.isEmpty()) {
-            Text(
-                text = "No artists found", modifier = Modifier.padding(16.dp)
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(
-                    horizontal = 12.dp, vertical = 8.dp
-                ), verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(
-                    items = artists.entries.toList(), key = { entry -> entry.key }) { entry ->
-                    val artist = entry.key
-                    val artistSongs = entry.value
 
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedArtist = artist
-                            }, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(
-                            containerColor = MusicZoneSurface
-                        ), elevation = CardDefaults.cardElevation(
-                            defaultElevation = 2.dp
-                        )
-                    ) {
-                        Row(
+        Column() {
+            MusicZoneHeader(
+                title = "Artists",
+                subtitle = "Your Music Artists"
+            )
+
+            if (artists.isEmpty()) {
+                Text(
+                    text = "No artists found", modifier = Modifier.padding(16.dp)
+                )
+            } else {
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(
+                        horizontal = 12.dp, vertical = 8.dp
+                    ), verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(
+                        items = artists.entries.toList(), key = { entry -> entry.key }) { entry ->
+                        val artist = entry.key
+                        val artistSongs = entry.value
+
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(
-                                    horizontal = 16.dp, vertical = 12.dp
-                                ), verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(52.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        MusicZoneElevated
-                                    ), contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = artist.trim().firstOrNull()?.uppercase() ?: "?",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MusicZonePurple
-                                )
-                            }
-
-                            Spacer(
-                                modifier = Modifier.width(16.dp)
+                                .clickable {
+                                    selectedArtist = artist
+                                },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MusicZoneSurface
+                            ),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = 2.dp
                             )
-
-                            Column(
-                                modifier = Modifier.weight(1f)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        horizontal = 16.dp, vertical = 12.dp
+                                    ), verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = artist,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MusicZoneTextPrimary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            MusicZoneElevated
+                                        ), contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = artist.trim().firstOrNull()?.uppercase() ?: "?",
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MusicZonePurple
+                                    )
+                                }
 
                                 Spacer(
-                                    modifier = Modifier.height(3.dp)
+                                    modifier = Modifier.width(16.dp)
                                 )
 
-                                Text(
-                                    text = "${artistSongs.size} songs",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MusicZoneTextSecondary
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = artist,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MusicZoneTextPrimary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+
+                                    Spacer(
+                                        modifier = Modifier.height(3.dp)
+                                    )
+
+                                    Text(
+                                        text = "${artistSongs.size} songs",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MusicZoneTextSecondary
+                                    )
+                                }
+
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = "Open artist",
+                                    tint = MusicZoneTextSecondary
                                 )
                             }
-
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = "Open artist",
-                                tint = MusicZoneTextSecondary
-                            )
                         }
                     }
                 }
