@@ -34,12 +34,14 @@ import com.example.musiczone.ui.navigation.tabs.FavoritesTab
 import com.example.musiczone.ui.navigation.tabs.SongsTab
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.musiczone.model.Song
+import com.example.musiczone.ui.components.RecentSongsSection
 
 private const val ROUTE_LIBRARY = "library"
 private const val ROUTE_NOW_PLAYING = "now_playing"
@@ -80,6 +82,7 @@ fun MusicLibraryScreen(
     val queue by viewModel.queue.collectAsState()
     val currentMediaItem by viewModel.currentMediaItem.collectAsState()
     var showQueue by remember { mutableStateOf(false) }
+    val recentSongs by viewModel.recentSongs.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadSongs()
@@ -126,6 +129,21 @@ fun MusicLibraryScreen(
 
                                     when (LibraryTab.entries[page]) {
 
+                                        LibraryTab.HOME -> {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(horizontal = 16.dp)
+                                            ) {
+                                                RecentSongsSection(
+                                                    songs = recentSongs,
+                                                    onSongClick = { song ->
+                                                        viewModel.playSong(song, recentSongs)
+                                                    }
+                                                )
+                                            }
+                                        }
+
                                         LibraryTab.SONGS -> {
                                             SongsTab(
                                                 searchQuery = searchQuery,
@@ -154,8 +172,7 @@ fun MusicLibraryScreen(
                                                     viewModel.getFavoriteGroupIdsForSong(song.id) { groupIds ->
                                                         selectedGroupIds = groupIds
                                                     }
-                                                }
-                                            )
+                                                })
                                         }
 
                                         LibraryTab.ARTISTS -> {
@@ -170,13 +187,13 @@ fun MusicLibraryScreen(
                                                     viewModel.getFavoriteGroupIdsForSong(song.id) { groupIds ->
                                                         selectedGroupIds = groupIds
                                                     }
-                                                }
-                                            )
+                                                })
                                         }
 
                                         LibraryTab.FAVORITES -> {
                                             FavoritesTab(
-                                                songs = songs, viewModel = viewModel,
+                                                songs = songs,
+                                                viewModel = viewModel,
                                                 onAddToGroup = { song ->
                                                     songToAddToGroup = song
                                                     selectedGroupIds = emptySet()
@@ -184,8 +201,7 @@ fun MusicLibraryScreen(
                                                     viewModel.getFavoriteGroupIdsForSong(song.id) { groupIds ->
                                                         selectedGroupIds = groupIds
                                                     }
-                                                }
-                                            )
+                                                })
                                         }
                                     }
                                 }
@@ -212,6 +228,8 @@ fun MusicLibraryScreen(
                                 icon = {
                                     Icon(
                                         imageVector = when (tab) {
+                                            LibraryTab.HOME -> Icons.Default.Home
+
                                             LibraryTab.SONGS -> Icons.Default.LibraryMusic
 
                                             LibraryTab.ALBUMS -> Icons.Default.Album
@@ -329,8 +347,7 @@ fun MusicLibraryScreen(
                     },
                     onQueueClick = {
                         showQueue = true
-                    }
-                )
+                    })
 
                 if (showQueue) {
                     QueueScreen(
@@ -388,7 +405,6 @@ fun MusicLibraryScreen(
                 }
 
                 songToAddToGroup = null
-            }
-        )
+            })
     }
 }

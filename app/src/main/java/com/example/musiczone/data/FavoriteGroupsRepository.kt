@@ -12,7 +12,9 @@ class FavoriteGroupsRepository(
 ) {
     private val database = Room.databaseBuilder(
         context.applicationContext, MusicDatabase::class.java, "musiczone.db"
-    ).build()
+    )
+        .addMigrations(MusicDatabase.MIGRATION_1_2)
+        .build()
 
     private val dao = database.favoriteGroupDao()
 

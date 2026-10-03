@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.stateIn
 import com.example.musiczone.data.FavoritesRepository
 import com.example.musiczone.data.FavoriteGroupsRepository
 import com.example.musiczone.data.local.FavoriteGroupEntity
+import com.example.musiczone.data.local.RecentSongRepository
+import kotlinx.coroutines.flow.update
 
 class MusicViewModel(
     application: Application
@@ -34,6 +36,7 @@ class MusicViewModel(
 
     private val favoritesRepository = FavoritesRepository(application)
     private val favoriteGroupsRepository = FavoriteGroupsRepository(application)
+    private val recentSongRepository = RecentSongRepository(application)
 
     private val _favoriteSongIds = MutableStateFlow<Set<Long>>(emptySet())
     val favoriteSongIds: StateFlow<Set<Long>> = _favoriteSongIds.asStateFlow()
@@ -45,11 +48,13 @@ class MusicViewModel(
 
     val isPlaying: StateFlow<Boolean> = musicController.isPlaying
 
-    val currentMediaItem: StateFlow<MediaItem?> =
-        musicController.currentMediaItem
+    val currentMediaItem: StateFlow<MediaItem?> = musicController.currentMediaItem
 
     private val _songs = MutableStateFlow<List<Song>>(emptyList())
     val songs: StateFlow<List<Song>> = _songs.asStateFlow()
+
+    private val _recentSongs = MutableStateFlow<List<Song>>(emptyList())
+    val recentSongs: StateFlow<List<Song>> = _recentSongs.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -108,14 +113,12 @@ class MusicViewModel(
 
             _favoriteSongIds.value = favoriteIds
 
-            val favoritesGroup =
-                favoriteGroupsRepository.getGroupByName("Favorites")
+            val favoritesGroup = favoriteGroupsRepository.getGroupByName("Favorites")
 
             if (favoritesGroup != null) {
                 favoriteIds.forEach { songId ->
                     favoriteGroupsRepository.addSongToGroup(
-                        groupId = favoritesGroup.id,
-                        songId = songId
+                        groupId = favoritesGroup.id, songId = songId
                     )
                 }
             }
@@ -153,6 +156,8 @@ class MusicViewModel(
             } finally {
                 _isLoading.value = false
             }
+
+            loadRecentSongs()
         }
     }
 
@@ -167,6 +172,14 @@ class MusicViewModel(
         musicController.play(
             songs, startIndex
         )
+
+        viewModelScope.launch {
+            recentSongRepository.recordSongPlayed(song.id)
+
+            _recentSongs.update { recentSongs ->
+                listOf(song) + recentSongs.filter { it.id != song.id }
+            }
+        }
     }
 
     fun addToQueue(song: Song) {
@@ -219,20 +232,16 @@ class MusicViewModel(
         }
 
         viewModelScope.launch {
-            val favoritesGroup =
-                favoriteGroupsRepository
-                    .getGroupByName("Favorites")
+            val favoritesGroup = favoriteGroupsRepository.getGroupByName("Favorites")
 
             if (favoritesGroup != null) {
                 if (isFavorite) {
                     favoriteGroupsRepository.addSongToGroup(
-                        groupId = favoritesGroup.id,
-                        songId = songId
+                        groupId = favoritesGroup.id, songId = songId
                     )
                 } else {
                     favoriteGroupsRepository.removeSongFromGroup(
-                        groupId = favoritesGroup.id,
-                        songId = songId
+                        groupId = favoritesGroup.id, songId = songId
                     )
                 }
             }
@@ -280,8 +289,7 @@ class MusicViewModel(
     fun addSongToFavoriteGroup(groupId: Long, songId: Long) {
         viewModelScope.launch {
             favoriteGroupsRepository.addSongToGroup(
-                groupId = groupId,
-                songId = songId
+                groupId = groupId, songId = songId
             )
 
             val group = favoriteGroupsRepository.getGroup(groupId)
@@ -297,8 +305,7 @@ class MusicViewModel(
     fun removeSongFromFavoriteGroup(groupId: Long, songId: Long) {
         viewModelScope.launch {
             favoriteGroupsRepository.removeSongFromGroup(
-                groupId = groupId,
-                songId = songId
+                groupId = groupId, songId = songId
             )
 
             val group = favoriteGroupsRepository.getGroup(groupId)
@@ -346,8 +353,25 @@ class MusicViewModel(
         musicController.playQueueItem(index)
     }
 
+    fun loadRecentSongs() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val recentSongEntities = recentSongRepository.getRecentSongs()
+
+            val recentSongIds = recentSongEntities.map {
+                it.songId
+            }
+
+            _recentSongs.value = recentSongIds.mapNotNull { songId ->
+                _songs.value.firstOrNull { song ->
+                    song.id == songId
+                }
+            }
+        }
+    }
+
     override fun onCleared() {
         musicController.release()
         favoriteGroupsRepository.close()
+        recentSongRepository.close()
     }
 }
