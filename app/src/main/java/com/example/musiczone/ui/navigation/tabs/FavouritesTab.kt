@@ -69,7 +69,9 @@ import com.example.musiczone.ui.theme.MusicZoneSurface
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesTab(
-    songs: List<Song>, viewModel: MusicViewModel
+    songs: List<Song>,
+    viewModel: MusicViewModel,
+    onAddToGroup: (Song) -> Unit
 ) {
     val favoriteGroups by viewModel.favoriteGroups.collectAsState()
 
@@ -264,53 +266,53 @@ fun FavoritesTab(
 
                             ListItem(
                                 modifier = Modifier.clickable {
-                                groupOptionsId = null
-                                groupToRename = optionsGroup.id
-                                renameGroupName = optionsGroup.name
-                            }, colors = ListItemDefaults.colors(
-                                containerColor = Color.Transparent
-                            ), leadingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = null,
-                                    tint = MusicZoneTextPrimary
-                                )
-                            }, headlineContent = {
-                                Text(
-                                    text = "Rename", color = MusicZoneTextPrimary
-                                )
-                            })
+                                    groupOptionsId = null
+                                    groupToRename = optionsGroup.id
+                                    renameGroupName = optionsGroup.name
+                                }, colors = ListItemDefaults.colors(
+                                    containerColor = Color.Transparent
+                                ), leadingContent = {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = null,
+                                        tint = MusicZoneTextPrimary
+                                    )
+                                }, headlineContent = {
+                                    Text(
+                                        text = "Rename", color = MusicZoneTextPrimary
+                                    )
+                                })
 
                             ListItem(
                                 modifier = Modifier.clickable(
-                                enabled = optionsGroup.name != "Favorites"
-                            ) {
-                                groupOptionsId = null
-                                viewModel.deleteFavoriteGroup(
-                                    optionsGroup.id
-                                )
-                            }, colors = ListItemDefaults.colors(
-                                containerColor = Color.Transparent
-                            ), leadingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = null,
-                                    tint = if (optionsGroup.name == "Favorites") {
-                                        MusicZoneTextSecondary
-                                    } else {
-                                        MusicZoneTextPrimary
-                                    }
-                                )
-                            }, headlineContent = {
-                                Text(
-                                    text = "Delete",
-                                    color = if (optionsGroup.name == "Favorites") {
-                                        MusicZoneTextSecondary
-                                    } else {
-                                        MusicZoneTextPrimary
-                                    }
-                                )
-                            })
+                                    enabled = optionsGroup.name != "Favorites"
+                                ) {
+                                    groupOptionsId = null
+                                    viewModel.deleteFavoriteGroup(
+                                        optionsGroup.id
+                                    )
+                                }, colors = ListItemDefaults.colors(
+                                    containerColor = Color.Transparent
+                                ), leadingContent = {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = if (optionsGroup.name == "Favorites") {
+                                            MusicZoneTextSecondary
+                                        } else {
+                                            MusicZoneTextPrimary
+                                        }
+                                    )
+                                }, headlineContent = {
+                                    Text(
+                                        text = "Delete",
+                                        color = if (optionsGroup.name == "Favorites") {
+                                            MusicZoneTextSecondary
+                                        } else {
+                                            MusicZoneTextPrimary
+                                        }
+                                    )
+                                })
                         }
                     }
                 }
@@ -359,19 +361,23 @@ fun FavoritesTab(
                     ) {
                         items(
                             items = groupSongs, key = { song -> song.id }) { song ->
-                            SongItem(song = song, onClick = {
-                                viewModel.playSong(song)
-                            }, onPlay = {
-                                viewModel.playSong(song)
-                            }, isFavorite = viewModel.isFavorite(song.id), onFavorite = {
-                                viewModel.toggleFavorite(song.id)
-                            }, onAddToGroup = {}, onRemoveFromGroup = {
-                                viewModel.removeSongFromFavoriteGroup(
-                                    groupId = group.id, songId = song.id
-                                )
-                            }, onAddToQueue = {
-                                viewModel.addToQueue(song)
-                            })
+                            SongItem(
+                                song = song, onClick = {
+                                viewModel.playSong(song, groupSongs)
+                                }, onPlay = {
+                                    viewModel.playSong(song, groupSongs)
+                                }, isFavorite = viewModel.isFavorite(song.id), onFavorite = {
+                                    viewModel.toggleFavorite(song.id)
+                                }, onAddToGroup = {
+                                    onAddToGroup(song)
+                                },
+                                onRemoveFromGroup = {
+                                    viewModel.removeSongFromFavoriteGroup(
+                                        groupId = group.id, songId = song.id
+                                    )
+                                }, onAddToQueue = {
+                                    viewModel.addToQueue(song)
+                                })
                         }
                     }
                 }

@@ -156,17 +156,16 @@ class MusicViewModel(
         }
     }
 
-    fun playSong(song: Song) {
-        val currentSongs = _songs.value
+    fun playSong(song: Song, songs: List<Song> = _songs.value) {
 
-        val startIndex = currentSongs.indexOfFirst { it.id == song.id }
+        val startIndex = songs.indexOfFirst { it.id == song.id }
 
         if (startIndex == -1) {
             return
         }
 
         musicController.play(
-            currentSongs, startIndex
+            songs, startIndex
         )
     }
 
@@ -343,7 +342,7 @@ class MusicViewModel(
         musicController.moveInQueue(fromIndex, toIndex)
     }
 
-    fun playQueueItem(index: Int){
+    fun playQueueItem(index: Int) {
         musicController.playQueueItem(index)
     }
 

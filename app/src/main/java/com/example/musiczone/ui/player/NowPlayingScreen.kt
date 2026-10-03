@@ -75,17 +75,12 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 
 private val FallbackBackgroundColors = listOf(
-    Color(0xFF24143D),
-    Color(0xFF142B4A),
-    Color(0xFF123A3A),
-    Color(0xFF3D2914),
-    Color(0xFF3D1829)
+    Color(0xFF24143D), Color(0xFF142B4A), Color(0xFF123A3A), Color(0xFF3D2914), Color(0xFF3D1829)
 )
 
 @Composable
@@ -129,9 +124,7 @@ fun NowPlayingScreen(
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     context.contentResolver.loadThumbnail(
-                        song.uri,
-                        Size(800, 800),
-                        null
+                        song.uri, Size(800, 800), null
                     )
                 } else {
                     null
@@ -143,15 +136,11 @@ fun NowPlayingScreen(
     }
 
     val fallbackColor = remember(song.id) {
-        FallbackBackgroundColors[
-            (song.id.hashCode() and Int.MAX_VALUE) %
-                    FallbackBackgroundColors.size
-        ]
+        FallbackBackgroundColors[(song.id.hashCode() and Int.MAX_VALUE) % FallbackBackgroundColors.size]
     }
 
     val playbackProgress = if (duration > 0L) {
-        (currentPosition.toFloat() / duration.toFloat())
-            .coerceIn(0f, 1f)
+        (currentPosition.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
     } else {
         0f
     }
@@ -170,15 +159,13 @@ fun NowPlayingScreen(
 
         // Blurred album artwork
         AnimatedContent(
-            targetState = bitmap,
-            transitionSpec = {
+            targetState = bitmap, transitionSpec = {
                 fadeIn(
                     animationSpec = tween(650)
                 ) togetherWith fadeOut(
                     animationSpec = tween(650)
                 )
-            },
-            label = "background_artwork_transition"
+            }, label = "background_artwork_transition"
         ) { bitmap ->
 
             if (bitmap != null) {
@@ -229,10 +216,8 @@ fun NowPlayingScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(
-                        horizontal = 24.dp,
-                        vertical = 20.dp
-                    ),
-                horizontalAlignment = Alignment.CenterHorizontally
+                        horizontal = 24.dp, vertical = 20.dp
+                    ), horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
                 // Top bar
@@ -242,15 +227,15 @@ fun NowPlayingScreen(
                         .height(52.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = onBack
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MusicZoneTextPrimary
-                        )
-                    }
+//                    IconButton(
+//                        onClick = onBack
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                            contentDescription = "Back",
+//                            tint = MusicZoneTextPrimary
+//                        )
+//                    }
 
                     Text(
                         text = "Now Playing",
@@ -262,29 +247,24 @@ fun NowPlayingScreen(
                     )
 
                     // Balances the back button width.
-                    Spacer(modifier = Modifier.height(verticalSpacing))
+//                    Spacer(modifier = Modifier.height(verticalSpacing))
                 }
 
                 Spacer(modifier = Modifier.height(verticalSpacing))
 
                 // Album artwork
                 AnimatedContent(
-                    targetState = song,
-                    transitionSpec = {
+                    targetState = song, transitionSpec = {
                         (fadeIn(
                             animationSpec = tween(400)
                         ) + scaleIn(
-                            initialScale = 0.94f,
-                            animationSpec = tween(400)
-                        )) togetherWith
-                                (fadeOut(
-                                    animationSpec = tween(250)
-                                ) + scaleOut(
-                                    targetScale = 1.04f,
-                                    animationSpec = tween(250)
-                                ))
-                    },
-                    label = "main_artwork_transition"
+                            initialScale = 0.94f, animationSpec = tween(400)
+                        )) togetherWith (fadeOut(
+                            animationSpec = tween(250)
+                        ) + scaleOut(
+                            targetScale = 1.04f, animationSpec = tween(250)
+                        ))
+                    }, label = "main_artwork_transition"
                 ) { targetSong ->
 
                     AlbumArtwork(
@@ -358,16 +338,13 @@ fun NowPlayingScreen(
                         drawRoundRect(
                             color = MusicZoneSurface.copy(alpha = 0.85f),
                             topLeft = androidx.compose.ui.geometry.Offset(
-                                0f,
-                                y - radius
+                                0f, y - radius
                             ),
                             size = androidx.compose.ui.geometry.Size(
-                                size.width,
-                                trackHeight
+                                size.width, trackHeight
                             ),
                             cornerRadius = CornerRadius(
-                                radius,
-                                radius
+                                radius, radius
                             )
                         )
 
@@ -377,16 +354,13 @@ fun NowPlayingScreen(
                             drawRoundRect(
                                 color = MusicZonePurple,
                                 topLeft = androidx.compose.ui.geometry.Offset(
-                                    0f,
-                                    y - radius
+                                    0f, y - radius
                                 ),
                                 size = androidx.compose.ui.geometry.Size(
-                                    activeWidth,
-                                    trackHeight
+                                    activeWidth, trackHeight
                                 ),
                                 cornerRadius = CornerRadius(
-                                    radius,
-                                    radius
+                                    radius, radius
                                 )
                             )
                         }
@@ -402,10 +376,8 @@ fun NowPlayingScreen(
                             radius = thumbRadius,
                             center = androidx.compose.ui.geometry.Offset(
                                 activeWidth.coerceIn(
-                                    thumbRadius,
-                                    size.width - thumbRadius
-                                ),
-                                y
+                                    thumbRadius, size.width - thumbRadius
+                                ), y
                             )
                         )
                     }
@@ -439,8 +411,7 @@ fun NowPlayingScreen(
                         .fillMaxWidth()
                         .padding(
                             top = 2.dp
-                        ),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        ), horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         text = formatTime(currentPosition),
@@ -467,8 +438,7 @@ fun NowPlayingScreen(
                 ) {
 
                     IconButton(
-                        onClick = onPrevious,
-                        modifier = Modifier.size(56.dp)
+                        onClick = onPrevious, modifier = Modifier.size(56.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.SkipPrevious,
@@ -496,14 +466,11 @@ fun NowPlayingScreen(
                                 Icons.Default.Pause
                             } else {
                                 Icons.Default.PlayArrow
-                            },
-                            contentDescription = if (isPlaying) {
+                            }, contentDescription = if (isPlaying) {
                                 "Pause"
                             } else {
                                 "Play"
-                            },
-                            tint = MusicZoneOnPrimary,
-                            modifier = Modifier.size(36.dp)
+                            }, tint = MusicZoneOnPrimary, modifier = Modifier.size(36.dp)
                         )
                     }
 
@@ -512,8 +479,7 @@ fun NowPlayingScreen(
                     )
 
                     IconButton(
-                        onClick = onNext,
-                        modifier = Modifier.size(56.dp)
+                        onClick = onNext, modifier = Modifier.size(56.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.SkipNext,
@@ -536,8 +502,7 @@ fun NowPlayingScreen(
                 ) {
 
                     IconButton(
-                        onClick = onShuffle,
-                        modifier = Modifier.size(44.dp)
+                        onClick = onShuffle, modifier = Modifier.size(44.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Shuffle,
@@ -556,21 +521,16 @@ fun NowPlayingScreen(
                     )
 
                     IconButton(
-                        onClick = onRepeat,
-                        modifier = Modifier.size(44.dp)
+                        onClick = onRepeat, modifier = Modifier.size(44.dp)
                     ) {
                         Icon(
                             imageVector = when (repeatMode) {
-                                Player.REPEAT_MODE_ONE ->
-                                    Icons.Default.RepeatOne
+                                Player.REPEAT_MODE_ONE -> Icons.Default.RepeatOne
 
-                                else ->
-                                    Icons.Default.Repeat
+                                else -> Icons.Default.Repeat
                             },
                             contentDescription = "Repeat",
-                            tint = if (
-                                repeatMode != Player.REPEAT_MODE_OFF
-                            ) {
+                            tint = if (repeatMode != Player.REPEAT_MODE_OFF) {
                                 MusicZonePurple
                             } else {
                                 MusicZoneTextSecondary
@@ -591,13 +551,11 @@ fun NowPlayingScreen(
                                 Icons.Filled.Favorite
                             } else {
                                 Icons.Outlined.FavoriteBorder
-                            },
-                            contentDescription = if (isFavorite) {
+                            }, contentDescription = if (isFavorite) {
                                 "Remove from favorites"
                             } else {
                                 "Add to favorites"
-                            },
-                            tint = if (isFavorite) {
+                            }, tint = if (isFavorite) {
                                 MusicZonePurple
                             } else {
                                 MusicZoneTextSecondary
@@ -626,8 +584,7 @@ fun NowPlayingScreen(
 
 @Composable
 fun AlbumArtwork(
-    song: Song,
-    modifier: Modifier = Modifier
+    song: Song, modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
@@ -640,9 +597,7 @@ fun AlbumArtwork(
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     context.contentResolver.loadThumbnail(
-                        song.uri,
-                        Size(800, 800),
-                        null
+                        song.uri, Size(800, 800), null
                     )
                 } else {
                     null
@@ -662,14 +617,10 @@ fun AlbumArtwork(
         )
     } else {
         BoxWithConstraints(
-            modifier = modifier
-                .background(MusicZoneElevated),
-            contentAlignment = Alignment.Center
+            modifier = modifier.background(MusicZoneElevated), contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "♪",
-                color = MusicZonePurple,
-                fontSize = (maxWidth.value * 0.45f).sp
+                text = "♪", color = MusicZonePurple, fontSize = (maxWidth.value * 0.45f).sp
             )
         }
     }
@@ -681,7 +632,6 @@ private fun formatTime(milliseconds: Long): String {
     val seconds = totalSeconds % 60
 
     return "%d:%02d".format(
-        minutes,
-        seconds
+        minutes, seconds
     )
 }

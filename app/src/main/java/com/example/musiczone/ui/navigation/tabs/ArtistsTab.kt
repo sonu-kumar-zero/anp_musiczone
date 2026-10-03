@@ -52,7 +52,8 @@ import kotlin.collections.orEmpty
 
 @Composable
 fun ArtistsTab(
-    songs: List<Song>, viewModel: MusicViewModel, favoriteSongIds: Set<Long>
+    songs: List<Song>, viewModel: MusicViewModel, favoriteSongIds: Set<Long>,
+    onAddToGroup: (Song) -> Unit
 ) {
     val artists = songs.filter { it.artist.isNotBlank() }.groupBy { it.artist }
     var selectedArtist by remember { mutableStateOf<String?>(null) }
@@ -200,12 +201,14 @@ fun ArtistsTab(
                 items(
                     items = artistSongs, key = { song -> song.id }) { song ->
                     SongItem(song = song, onClick = {
-                        viewModel.playSong(song)
+                        viewModel.playSong(song, artistSongs)
                     }, onPlay = {
-                        viewModel.playSong(song)
+                        viewModel.playSong(song, artistSongs)
                     }, isFavorite = song.id in favoriteSongIds, onFavorite = {
                         viewModel.toggleFavorite(song.id)
-                    }, onAddToGroup = {}, onAddToQueue = {
+                    }, onAddToGroup = {
+                        onAddToGroup(song)
+                    }, onAddToQueue = {
                         viewModel.addToQueue(song)
                     })
                 }

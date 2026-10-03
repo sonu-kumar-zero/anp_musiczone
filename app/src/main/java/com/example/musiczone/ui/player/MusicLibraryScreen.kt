@@ -39,7 +39,6 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.example.musiczone.ui.player.AddToGroupDialog
 import com.example.musiczone.model.Song
 
 private const val ROUTE_LIBRARY = "library"
@@ -147,7 +146,15 @@ fun MusicLibraryScreen(
                                             AlbumsTab(
                                                 viewModel = viewModel,
                                                 songs = songs,
-                                                favoriteSongIds = favoriteSongIds
+                                                favoriteSongIds = favoriteSongIds,
+                                                onAddToGroup = { song ->
+                                                    songToAddToGroup = song
+                                                    selectedGroupIds = emptySet()
+
+                                                    viewModel.getFavoriteGroupIdsForSong(song.id) { groupIds ->
+                                                        selectedGroupIds = groupIds
+                                                    }
+                                                }
                                             )
                                         }
 
@@ -155,13 +162,29 @@ fun MusicLibraryScreen(
                                             ArtistsTab(
                                                 songs = songs,
                                                 viewModel = viewModel,
-                                                favoriteSongIds = favoriteSongIds
+                                                favoriteSongIds = favoriteSongIds,
+                                                onAddToGroup = { song ->
+                                                    songToAddToGroup = song
+                                                    selectedGroupIds = emptySet()
+
+                                                    viewModel.getFavoriteGroupIdsForSong(song.id) { groupIds ->
+                                                        selectedGroupIds = groupIds
+                                                    }
+                                                }
                                             )
                                         }
 
                                         LibraryTab.FAVORITES -> {
                                             FavoritesTab(
-                                                songs = songs, viewModel = viewModel
+                                                songs = songs, viewModel = viewModel,
+                                                onAddToGroup = { song ->
+                                                    songToAddToGroup = song
+                                                    selectedGroupIds = emptySet()
+
+                                                    viewModel.getFavoriteGroupIdsForSong(song.id) { groupIds ->
+                                                        selectedGroupIds = groupIds
+                                                    }
+                                                }
                                             )
                                         }
                                     }

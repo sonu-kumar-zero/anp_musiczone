@@ -206,6 +206,8 @@ fun SongItem(
                             text = song.title,
                             color = MusicZoneTextPrimary,
                             style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(
                                 horizontal = 24.dp, vertical = 12.dp
                             )
@@ -215,6 +217,8 @@ fun SongItem(
                             text = song.artist,
                             color = MusicZoneTextSecondary,
                             style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(
                                 start = 24.dp, bottom = 12.dp, end = 24.dp
                             )
