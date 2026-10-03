@@ -16,10 +16,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import com.example.musiczone.data.FavoritesRepository
+import com.example.musiczone.data.FavoriteGroupsRepository
+import com.example.musiczone.data.local.FavoriteGroupEntity
 
 class MusicViewModel(
     application: Application
 ) : AndroidViewModel(application) {
+
+    private val favoriteGroupSongFlows = mutableMapOf<Long, StateFlow<List<Long>>>()
 
     private val songCache = SongCache(application)
     private val repository = MusicRepository(
@@ -27,9 +31,13 @@ class MusicViewModel(
     )
 
     private val favoritesRepository = FavoritesRepository(application)
+    private val favoriteGroupsRepository = FavoriteGroupsRepository(application)
 
     private val _favoriteSongIds = MutableStateFlow<Set<Long>>(emptySet())
     val favoriteSongIds: StateFlow<Set<Long>> = _favoriteSongIds.asStateFlow()
+
+    private val _favoriteGroups = MutableStateFlow<List<FavoriteGroupEntity>>(emptyList())
+    val favoriteGroups: StateFlow<List<FavoriteGroupEntity>> = _favoriteGroups.asStateFlow()
 
     private val musicController = MusicController(application)
 
@@ -75,8 +83,6 @@ class MusicViewModel(
 
     init {
         viewModelScope.launch {
-            _favoriteSongIds.value = favoritesRepository.getFavoriteIds()
-
             musicController.currentMediaItem.collect { mediaItem ->
                 if (mediaItem == null) {
                     _currentSong.value = null
@@ -89,6 +95,36 @@ class MusicViewModel(
                     song.id == songId
                 }
             }
+        }
+
+        viewModelScope.launch {
+            val favoriteIds = favoritesRepository.getFavoriteIds()
+
+            _favoriteSongIds.value = favoriteIds
+
+            favoriteGroupsRepository.ensureDefaultGroup()
+
+            val favoritesGroup =
+                favoriteGroupsRepository.getGroupByName("Favorites")
+
+            if (favoritesGroup != null) {
+                favoriteIds.forEach { songId ->
+                    favoriteGroupsRepository.addSongToGroup(
+                        groupId = favoritesGroup.id,
+                        songId = songId
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            favoriteGroupsRepository.observeGroups().collect { groups ->
+                _favoriteGroups.value = groups
+            }
+        }
+
+        viewModelScope.launch {
+            favoriteGroupsRepository.ensureDefaultGroup()
         }
     }
 
@@ -174,13 +210,121 @@ class MusicViewModel(
         } else {
             _favoriteSongIds.value - songId
         }
+
+        viewModelScope.launch {
+            val favoritesGroup =
+                favoriteGroupsRepository
+                    .getGroupByName("Favorites")
+
+            if (favoritesGroup != null) {
+                if (isFavorite) {
+                    favoriteGroupsRepository.addSongToGroup(
+                        groupId = favoritesGroup.id,
+                        songId = songId
+                    )
+                } else {
+                    favoriteGroupsRepository.removeSongFromGroup(
+                        groupId = favoritesGroup.id,
+                        songId = songId
+                    )
+                }
+            }
+        }
     }
 
     fun isFavorite(songId: Long): Boolean {
         return _favoriteSongIds.value.contains(songId)
     }
 
+    fun createFavoriteGroup(name: String) {
+        val trimmedName = name.trim()
+
+        if (trimmedName.isEmpty()) {
+            return
+        }
+
+        viewModelScope.launch {
+            favoriteGroupsRepository.createGroup(trimmedName)
+        }
+    }
+
+    fun renameFavoriteGroup(
+        groupId: Long, name: String
+    ) {
+        val trimmedName = name.trim()
+
+        if (trimmedName.isEmpty()) {
+            return
+        }
+
+        viewModelScope.launch {
+            favoriteGroupsRepository.renameGroup(
+                groupId = groupId, name = trimmedName
+            )
+        }
+    }
+
+    fun deleteFavoriteGroup(groupId: Long) {
+        viewModelScope.launch {
+            favoriteGroupsRepository.deleteGroup(groupId)
+        }
+    }
+
+    fun addSongToFavoriteGroup(groupId: Long, songId: Long) {
+        viewModelScope.launch {
+            favoriteGroupsRepository.addSongToGroup(
+                groupId = groupId,
+                songId = songId
+            )
+
+            val group = favoriteGroupsRepository.getGroup(groupId)
+
+            if (group?.name == "Favorites") {
+                favoritesRepository.addFavorite(songId)
+
+                _favoriteSongIds.value += songId
+            }
+        }
+    }
+
+    fun removeSongFromFavoriteGroup(groupId: Long, songId: Long) {
+        viewModelScope.launch {
+            favoriteGroupsRepository.removeSongFromGroup(
+                groupId = groupId,
+                songId = songId
+            )
+
+            val group = favoriteGroupsRepository.getGroup(groupId)
+
+            if (group?.name == "Favorites") {
+                favoritesRepository.removeFavorite(songId)
+
+                _favoriteSongIds.value -= songId
+            }
+        }
+    }
+
+    fun observeFavoriteGroupSongIds(
+        groupId: Long
+    ): StateFlow<List<Long>> {
+        return favoriteGroupSongFlows.getOrPut(groupId) {
+            favoriteGroupsRepository.observeSongIds(groupId).stateIn(
+                viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList()
+            )
+        }
+    }
+
+    fun getFavoriteGroupIdsForSong(
+        songId: Long, onResult: (Set<Long>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val groupIds = favoriteGroupsRepository.getGroupIdsForSong(songId)
+            onResult(groupIds.toSet())
+        }
+    }
+
     override fun onCleared() {
         musicController.release()
+        favoriteGroupsRepository.close()
     }
 }

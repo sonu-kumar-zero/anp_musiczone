@@ -36,6 +36,11 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.musiczone.ui.player.AddToGroupDialog
+import com.example.musiczone.model.Song
 
 private const val ROUTE_LIBRARY = "library"
 private const val ROUTE_NOW_PLAYING = "now_playing"
@@ -46,6 +51,12 @@ fun MusicLibraryScreen(
 ) {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
+    var songToAddToGroup by remember {
+        mutableStateOf<Song?>(null)
+    }
+    var selectedGroupIds by remember {
+        mutableStateOf<Set<Long>>(emptySet())
+    }
 
     val pagerState = rememberPagerState(
         initialPage = LibraryTab.SONGS.ordinal, pageCount = {
@@ -65,6 +76,7 @@ fun MusicLibraryScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filteredSongs by viewModel.filteredSongs.collectAsState()
     val favoriteSongIds by viewModel.favoriteSongIds.collectAsState()
+    val favoriteGroups by viewModel.favoriteGroups.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadSongs()
@@ -116,8 +128,15 @@ fun MusicLibraryScreen(
                                                 searchQuery = searchQuery,
                                                 viewModel = viewModel,
                                                 filteredSongs = filteredSongs,
-                                                favoriteSongIds = favoriteSongIds
-                                            )
+                                                favoriteSongIds = favoriteSongIds,
+                                                onAddToGroup = { song ->
+                                                    songToAddToGroup = song
+                                                    selectedGroupIds = emptySet()
+
+                                                    viewModel.getFavoriteGroupIdsForSong(song.id) { groupIds ->
+                                                        selectedGroupIds = groupIds
+                                                    }
+                                                })
                                         }
 
                                         LibraryTab.ALBUMS -> {
@@ -138,9 +157,7 @@ fun MusicLibraryScreen(
 
                                         LibraryTab.FAVORITES -> {
                                             FavoritesTab(
-                                                songs = songs,
-                                                favoriteSongIds = favoriteSongIds,
-                                                viewModel = viewModel
+                                                songs = songs, viewModel = viewModel
                                             )
                                         }
                                     }
@@ -285,5 +302,42 @@ fun MusicLibraryScreen(
                     })
             }
         }
+    }
+
+    if (songToAddToGroup != null) {
+
+        AddToGroupDialog(
+            groups = favoriteGroups,
+            selectedGroupIds = selectedGroupIds,
+            onGroupToggle = { groupId ->
+                selectedGroupIds = if (groupId in selectedGroupIds) {
+                    selectedGroupIds - groupId
+                } else {
+                    selectedGroupIds + groupId
+                }
+            },
+            onDismiss = {
+                songToAddToGroup = null
+            },
+            onConfirm = {
+                val song = songToAddToGroup
+
+                if (song != null) {
+                    favoriteGroups.forEach { group ->
+                        if (group.id in selectedGroupIds) {
+                            viewModel.addSongToFavoriteGroup(
+                                groupId = group.id, songId = song.id
+                            )
+                        } else {
+                            viewModel.removeSongFromFavoriteGroup(
+                                groupId = group.id, songId = song.id
+                            )
+                        }
+                    }
+                }
+
+                songToAddToGroup = null
+            }
+        )
     }
 }

@@ -49,12 +49,13 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import com.example.musiczone.ui.theme.MusicZonePurple
 
 @Composable
-public fun SongItem(
+fun SongItem(
     song: Song,
     onClick: () -> Unit,
     onPlay: () -> Unit,
     isFavorite: Boolean,
     onFavorite: () -> Unit,
+    onAddToGroup: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -176,8 +177,6 @@ public fun SongItem(
         Box {
 
 
-
-
             IconButton(
                 onClick = {
                     menuExpanded = true
@@ -212,6 +211,16 @@ public fun SongItem(
                     },
                     onClick = {
                         menuExpanded = false
+                    }
+                )
+
+                DropdownMenuItem(
+                    text = {
+                        Text("Add to group")
+                    },
+                    onClick = {
+                        menuExpanded = false
+                        onAddToGroup()
                     }
                 )
 

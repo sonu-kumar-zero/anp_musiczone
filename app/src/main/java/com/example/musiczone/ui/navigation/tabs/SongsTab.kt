@@ -32,7 +32,8 @@ fun SongsTab(
     searchQuery: String,
     viewModel: MusicViewModel,
     filteredSongs: List<Song>,
-    favoriteSongIds: Set<Long>
+    favoriteSongIds: Set<Long>,
+    onAddToGroup: (Song) -> Unit
 ) {
 
     Column(
@@ -104,6 +105,8 @@ fun SongsTab(
                         viewModel.playSong(song)
                     }, isFavorite = song.id in favoriteSongIds, onFavorite = {
                         viewModel.toggleFavorite(song.id)
+                    }, onAddToGroup = {
+                        onAddToGroup(song)
                     })
                 }
             }
