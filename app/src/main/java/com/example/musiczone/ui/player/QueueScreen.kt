@@ -31,11 +31,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import com.example.musiczone.ui.theme.MusicZoneElevated
+import com.example.musiczone.ui.theme.MusicZoneSurface
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,11 +67,8 @@ fun QueueScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        start = 24.dp,
-                        end = 16.dp,
-                        bottom = 12.dp
-                    ),
-                verticalAlignment = Alignment.CenterVertically
+                        start = 24.dp, end = 16.dp, bottom = 12.dp
+                    ), verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Queue",
@@ -89,83 +91,101 @@ fun QueueScreen(
             val listState = rememberLazyListState()
 
             val reorderableState = rememberReorderableLazyListState(
-                lazyListState = listState,
-                onMove = { from, to ->
+                lazyListState = listState, onMove = { from, to ->
                     onMove(from.index, to.index)
                 })
 
             LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxHeight()
+                state = listState, modifier = Modifier.fillMaxHeight()
             ) {
                 itemsIndexed(
-                    items = queue,
-                    key = { _, item ->
+                    items = queue, key = { _, item ->
                         item.mediaId
-                    }
-                ) { index, item ->
+                    }) { index, item ->
 
                     ReorderableItem(
-                        state = reorderableState,
-                        key = item.mediaId
-                    ) {
-                        val isCurrent =
-                            item.mediaId == currentMediaItem?.mediaId
+                        state = reorderableState, key = item.mediaId
+                    ) { isDragging ->
 
-                        ListItem(
-                            leadingContent = {
-                                Icon(
-                                    imageVector = Icons.Default.DragHandle,
-                                    contentDescription = "Drag to reorder",
-                                    tint = MusicZoneTextSecondary,
-                                    modifier = Modifier
-                                        .size(28.dp)
-                                        .longPressDraggableHandle()
-                                )
-                            },
-                            headlineContent = {
-                                Text(
-                                    text = item.mediaMetadata.title?.toString()
-                                        ?: "Unknown song",
-                                    color = MusicZoneTextPrimary,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            },
-                            supportingContent = {
-                                Column {
+                        val elevation by animateDpAsState(
+                            targetValue = if (isDragging) 8.dp else 0.dp, label = "dragElevation"
+                        )
+
+                        val isCurrent = item.mediaId == currentMediaItem?.mediaId
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                                .shadow(
+                                    elevation = elevation, shape = MaterialTheme.shapes.medium
+                                ),
+                            colors = CardDefaults.cardColors(
+                                containerColor = when {
+                                    isDragging -> MusicZoneElevated
+                                    isCurrent -> MusicZoneSurface
+                                    else -> MusicZoneBackground
+                                }
+                            )
+                        ) {
+
+
+                            ListItem(
+                                modifier = Modifier
+                                    .longPressDraggableHandle(),
+                                colors = ListItemDefaults.colors(
+                                    containerColor = Color.Transparent
+                                ),
+                                leadingContent = {
+                                    Icon(
+                                        imageVector = Icons.Default.DragHandle,
+                                        contentDescription = "Drag to reorder",
+                                        tint = MusicZoneTextSecondary,
+                                        modifier = Modifier
+                                            .size(28.dp)
+                                    )
+                                },
+                                headlineContent = {
                                     Text(
-                                        text = item.mediaMetadata.artist?.toString()
-                                            ?: "Unknown artist",
-                                        color = MusicZoneTextSecondary,
+                                        text = item.mediaMetadata.title?.toString()
+                                            ?: "Unknown song",
+                                        color = MusicZoneTextPrimary,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
-
-                                    if (isCurrent) {
+                                },
+                                supportingContent = {
+                                    Column {
                                         Text(
-                                            text = "Playing",
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MusicZonePurple
+                                            text = item.mediaMetadata.artist?.toString()
+                                                ?: "Unknown artist",
+                                            color = MusicZoneTextSecondary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+
+                                        if (isCurrent) {
+                                            Text(
+                                                text = "Playing",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MusicZonePurple
+                                            )
+                                        }
+                                    }
+                                },
+                                trailingContent = {
+                                    IconButton(
+                                        onClick = {
+                                            onRemove(index)
+                                        }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Remove from queue",
+                                            tint = MusicZoneTextSecondary
                                         )
                                     }
-                                }
-                            },
-                            trailingContent = {
-                                IconButton(
-                                    onClick = {
-                                        onRemove(index)
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Remove from queue",
-                                        tint = MusicZoneTextSecondary
-                                    )
-                                }
-                            }
-                        )
+                                })
+                        }
                     }
                 }
             }
