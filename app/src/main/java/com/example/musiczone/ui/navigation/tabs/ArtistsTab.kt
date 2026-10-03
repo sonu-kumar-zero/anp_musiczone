@@ -184,7 +184,9 @@ fun ArtistsTab(
                         viewModel.playSong(song)
                     }, isFavorite = song.id in favoriteSongIds, onFavorite = {
                         viewModel.toggleFavorite(song.id)
-                    }, onAddToGroup = {})
+                    }, onAddToGroup = {}, onAddToQueue = {
+                        viewModel.addToQueue(song)
+                    })
                 }
             }
         }

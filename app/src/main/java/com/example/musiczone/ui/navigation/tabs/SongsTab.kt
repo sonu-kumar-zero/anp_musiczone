@@ -107,6 +107,8 @@ fun SongsTab(
                         viewModel.toggleFavorite(song.id)
                     }, onAddToGroup = {
                         onAddToGroup(song)
+                    }, onAddToQueue = {
+                        viewModel.addToQueue(song)
                     })
                 }
             }

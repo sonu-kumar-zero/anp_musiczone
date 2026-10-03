@@ -41,16 +41,13 @@ class MusicController(
     val repeatMode: StateFlow<Int> = _repeatMode.asStateFlow()
 
     private val _isShuffleEnabled = MutableStateFlow(false)
-    val isShuffleEnabled: StateFlow<Boolean> =
-        _isShuffleEnabled.asStateFlow()
+    val isShuffleEnabled: StateFlow<Boolean> = _isShuffleEnabled.asStateFlow()
 
     private var positionJob: Job? = null
 
     private val sessionToken = SessionToken(
-        context,
-        ComponentName(
-            context,
-            MusicService::class.java
+        context, ComponentName(
+            context, MusicService::class.java
         )
     )
 
@@ -59,8 +56,7 @@ class MusicController(
     private val playerListener = object : Player.Listener {
 
         override fun onMediaItemTransition(
-            mediaItem: MediaItem?,
-            reason: Int
+            mediaItem: MediaItem?, reason: Int
         ) {
             _currentMediaItem.value = mediaItem
         }
@@ -96,15 +92,12 @@ class MusicController(
         }
     }
 
-    private val controllerFuture: ListenableFuture<MediaController> =
-        MediaController.Builder(
-            context,
-            sessionToken
-        ).buildAsync()
+    private val controllerFuture: ListenableFuture<MediaController> = MediaController.Builder(
+        context, sessionToken
+    ).buildAsync()
 
     fun play(
-        songs: List<Song>,
-        startIndex: Int
+        songs: List<Song>, startIndex: Int
     ) {
         controllerFuture.addListener(
             {
@@ -116,23 +109,15 @@ class MusicController(
                 }
 
                 val mediaItems = songs.map { song ->
-                    MediaItem.Builder()
-                        .setMediaId(song.id.toString())
-                        .setUri(song.uri)
+                    MediaItem.Builder().setMediaId(song.id.toString()).setUri(song.uri)
                         .setMediaMetadata(
-                            MediaMetadata.Builder()
-                                .setTitle(song.title)
-                                .setArtist(song.artist)
-                                .setAlbumTitle(song.album)
-                                .build()
-                        )
-                        .build()
+                            MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist)
+                                .setAlbumTitle(song.album).build()
+                        ).build()
                 }
 
                 controller?.setMediaItems(
-                    mediaItems,
-                    startIndex,
-                    0L
+                    mediaItems, startIndex, 0L
                 )
 
                 _currentMediaItem.value = mediaItems[startIndex]
@@ -140,8 +125,7 @@ class MusicController(
                 controller?.prepare()
                 controller?.play()
                 startPositionUpdates()
-            },
-            ContextCompat.getMainExecutor(context)
+            }, ContextCompat.getMainExecutor(context)
         )
     }
 
@@ -170,8 +154,7 @@ class MusicController(
 
     fun toggleShuffle() {
         controller?.let { mediaController ->
-            mediaController.shuffleModeEnabled =
-                !mediaController.shuffleModeEnabled
+            mediaController.shuffleModeEnabled = !mediaController.shuffleModeEnabled
         }
     }
 
@@ -191,6 +174,16 @@ class MusicController(
 
     fun skipNext() {
         controller?.seekToNextMediaItem()
+    }
+
+    fun addToQueue(song: Song) {
+        val mediaItem =
+            MediaItem.Builder().setMediaId(song.id.toString()).setUri(song.uri).setMediaMetadata(
+                    MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist)
+                        .setAlbumTitle(song.album).build()
+                ).build()
+
+        controller?.addMediaItem(mediaItem)
     }
 
     fun release() {

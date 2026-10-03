@@ -234,7 +234,13 @@ fun FavoritesTab(
                                 viewModel.playSong(song)
                             }, isFavorite = viewModel.isFavorite(song.id), onFavorite = {
                                 viewModel.toggleFavorite(song.id)
-                            }, onAddToGroup = {})
+                            }, onAddToGroup = {}, onRemoveFromGroup = {
+                                viewModel.removeSongFromFavoriteGroup(
+                                    groupId = group.id, songId = song.id
+                                )
+                            }, onAddToQueue = {
+                                viewModel.addToQueue(song)
+                            })
                         }
                     }
                 }

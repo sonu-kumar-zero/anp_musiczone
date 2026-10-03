@@ -17,9 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,9 +45,18 @@ import com.example.musiczone.ui.theme.MusicZoneTextSecondary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.QueueMusic
+import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.example.musiczone.ui.theme.MusicZonePurple
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ModalBottomSheet
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SongItem(
     song: Song,
@@ -56,6 +65,8 @@ fun SongItem(
     isFavorite: Boolean,
     onFavorite: () -> Unit,
     onAddToGroup: () -> Unit,
+    onRemoveFromGroup: (() -> Unit)? = null,
+    onAddToQueue: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -68,9 +79,7 @@ fun SongItem(
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     context.contentResolver.loadThumbnail(
-                        song.uri,
-                        Size(160, 160),
-                        null
+                        song.uri, Size(160, 160), null
                     )
                 } else {
                     null
@@ -86,10 +95,8 @@ fun SongItem(
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(
-                horizontal = 16.dp,
-                vertical = 8.dp
-            ),
-        verticalAlignment = Alignment.CenterVertically
+                horizontal = 16.dp, vertical = 8.dp
+            ), verticalAlignment = Alignment.CenterVertically
     ) {
 
         // Album artwork
@@ -107,8 +114,7 @@ fun SongItem(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(MusicZoneElevated),
-                contentAlignment = Alignment.Center
+                    .background(MusicZoneElevated), contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "♪",
@@ -153,13 +159,11 @@ fun SongItem(
                     Icons.Filled.Favorite
                 } else {
                     Icons.Outlined.FavoriteBorder
-                },
-                contentDescription = if (isFavorite) {
+                }, contentDescription = if (isFavorite) {
                     "Remove from favorites"
                 } else {
                     "Add to favorites"
-                },
-                tint = if (isFavorite) {
+                }, tint = if (isFavorite) {
                     MusicZonePurple
                 } else {
                     MusicZoneTextSecondary
@@ -180,8 +184,7 @@ fun SongItem(
             IconButton(
                 onClick = {
                     menuExpanded = true
-                }
-            ) {
+                }) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = "Song options",
@@ -189,49 +192,116 @@ fun SongItem(
                 )
             }
 
-            DropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = {
-                    menuExpanded = false
+            if (menuExpanded) {
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        menuExpanded = false
+                    }) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    ) {
+                        Text(
+                            text = song.title,
+                            color = MusicZoneTextPrimary,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(
+                                horizontal = 24.dp, vertical = 12.dp
+                            )
+                        )
+
+                        Text(
+                            text = song.artist,
+                            color = MusicZoneTextSecondary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(
+                                start = 24.dp, bottom = 12.dp, end = 24.dp
+                            )
+                        )
+
+                        ListItem(
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = null
+                                )
+                            },
+                            headlineContent = {
+                                Text("Play")
+                            },
+                            modifier = Modifier.clickable {
+                                menuExpanded = false
+                                onPlay()
+                            }
+                        )
+
+                        ListItem(
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                                    contentDescription = null
+                                )
+                            },
+                            headlineContent = {
+                                Text("Add to queue")
+                            },
+                            modifier = Modifier.clickable {
+                                menuExpanded = false
+                                onAddToQueue()
+                            }
+                        )
+
+                        ListItem(
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
+                                    contentDescription = null
+                                )
+                            },
+                            headlineContent = {
+                                Text("Add to group")
+                            },
+                            modifier = Modifier.clickable {
+                                menuExpanded = false
+                                onAddToGroup()
+                            }
+                        )
+
+                        if (onRemoveFromGroup != null) {
+                            ListItem(
+                                leadingContent = {
+                                    Icon(
+                                        imageVector = Icons.Default.RemoveCircleOutline,
+                                        contentDescription = null
+                                    )
+                                },
+                                headlineContent = {
+                                    Text("Remove from group")
+                                },
+                                modifier = Modifier.clickable {
+                                    menuExpanded = false
+                                    onRemoveFromGroup()
+                                }
+                            )
+                        }
+
+                        ListItem(
+                            leadingContent = {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = null
+                                )
+                            },
+                            headlineContent = {
+                                Text("Song info")
+                            },
+                            modifier = Modifier.clickable {
+                                menuExpanded = false
+                            }
+                        )
+                    }
                 }
-            ) {
-                DropdownMenuItem(
-                    text = {
-                        Text("Play")
-                    },
-                    onClick = {
-                        menuExpanded = false
-                        onPlay()
-                    }
-                )
-
-                DropdownMenuItem(
-                    text = {
-                        Text("Add to queue")
-                    },
-                    onClick = {
-                        menuExpanded = false
-                    }
-                )
-
-                DropdownMenuItem(
-                    text = {
-                        Text("Add to group")
-                    },
-                    onClick = {
-                        menuExpanded = false
-                        onAddToGroup()
-                    }
-                )
-
-                DropdownMenuItem(
-                    text = {
-                        Text("Song info")
-                    },
-                    onClick = {
-                        menuExpanded = false
-                    }
-                )
             }
         }
     }

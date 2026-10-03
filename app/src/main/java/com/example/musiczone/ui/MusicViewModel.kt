@@ -166,6 +166,10 @@ class MusicViewModel(
         )
     }
 
+    fun addToQueue(song: Song) {
+        musicController.addToQueue(song)
+    }
+
     fun togglePlayPause() {
         musicController.togglePlayPause()
     }

@@ -162,22 +162,17 @@ fun AlbumsTab(
             ) {
                 items(
                     items = albumSongs, key = { song -> song.id }) { song ->
-                    SongItem(
-                        song = song,
-                        onClick = {
-                            viewModel.playSong(song)
-                        },
-                        onPlay = {
-                            viewModel.playSong(song)
-                        },
-                        isFavorite = song.id in favoriteSongIds,
-                        onFavorite = {
-                            viewModel.toggleFavorite(song.id)
-                        },
-                        onAddToGroup = {
-                            
-                        }
-                    )
+                    SongItem(song = song, onClick = {
+                        viewModel.playSong(song)
+                    }, onPlay = {
+                        viewModel.playSong(song)
+                    }, isFavorite = song.id in favoriteSongIds, onFavorite = {
+                        viewModel.toggleFavorite(song.id)
+                    }, onAddToGroup = {
+
+                    }, onAddToQueue = {
+                        viewModel.addToQueue(song)
+                    })
                 }
             }
         }
