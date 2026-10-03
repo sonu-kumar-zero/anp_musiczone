@@ -1,5 +1,6 @@
 package com.example.musiczone.ui.navigation.tabs
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +55,13 @@ fun ArtistsTab(
 ) {
     val artists = songs.filter { it.artist.isNotBlank() }.groupBy { it.artist }
     var selectedArtist by remember { mutableStateOf<String?>(null) }
+
+    BackHandler(
+        enabled = selectedArtist != null
+    ) {
+        selectedArtist = null
+    }
+
 
     if (selectedArtist == null) {
         if (artists.isEmpty()) {
