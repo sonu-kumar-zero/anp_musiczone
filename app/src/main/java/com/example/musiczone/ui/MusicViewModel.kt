@@ -23,8 +23,7 @@ class MusicViewModel(
 
     private val songCache = SongCache(application)
     private val repository = MusicRepository(
-        contentResolver = application.contentResolver,
-        songCache = songCache
+        contentResolver = application.contentResolver, songCache = songCache
     )
 
     private val favoritesRepository = FavoritesRepository(application)
@@ -48,37 +47,31 @@ class MusicViewModel(
     val currentPosition: StateFlow<Long> = musicController.currentPosition
     val duration: StateFlow<Long> = musicController.duration
 
-    val isShuffleEnabled: StateFlow<Boolean> =
-        musicController.isShuffleEnabled
+    val isShuffleEnabled: StateFlow<Boolean> = musicController.isShuffleEnabled
 
-    val repeatMode: StateFlow<Int> =
-        musicController.repeatMode
+    val repeatMode: StateFlow<Int> = musicController.repeatMode
 
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    val filteredSongs: StateFlow<List<Song>> =
-        combine(
-            _songs,
-            _searchQuery
-        ) { songs, query ->
-            if (query.isBlank()) {
-                songs
-            } else {
-                val search = query.trim()
+    val filteredSongs: StateFlow<List<Song>> = combine(
+        _songs, _searchQuery
+    ) { songs, query ->
+        if (query.isBlank()) {
+            songs
+        } else {
+            val search = query.trim()
 
-                songs.filter { song ->
-                    song.title.contains(search, ignoreCase = true) ||
-                            song.artist.contains(search, ignoreCase = true) ||
-                            song.album.contains(search, ignoreCase = true)
-                }
+            songs.filter { song ->
+                song.title.contains(search, ignoreCase = true) || song.artist.contains(
+                    search, ignoreCase = true
+                ) || song.album.contains(search, ignoreCase = true)
             }
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5_000),
-            emptyList()
-        )
+        }
+    }.stateIn(
+        viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList()
+    )
 
     init {
         viewModelScope.launch {
@@ -133,8 +126,7 @@ class MusicViewModel(
         }
 
         musicController.play(
-            currentSongs,
-            startIndex
+            currentSongs, startIndex
         )
     }
 

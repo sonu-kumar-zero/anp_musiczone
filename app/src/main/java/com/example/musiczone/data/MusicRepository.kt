@@ -1,4 +1,3 @@
-
 package com.example.musiczone.data
 
 import android.content.ContentResolver
@@ -6,8 +5,7 @@ import android.provider.MediaStore
 import com.example.musiczone.model.Song
 
 class MusicRepository(
-    private val contentResolver: ContentResolver,
-    private val songCache: SongCache
+    private val contentResolver: ContentResolver, private val songCache: SongCache
 ) {
 
     fun getSongs(): List<Song> {
@@ -26,11 +24,7 @@ class MusicRepository(
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
 
         contentResolver.query(
-            collection,
-            projection,
-            selection,
-            null,
-            "${MediaStore.Audio.Media.TITLE} ASC"
+            collection, projection, selection, null, "${MediaStore.Audio.Media.TITLE} ASC"
         )?.use { cursor ->
 
             val idColumn = cursor.getColumnIndexOrThrow(
@@ -56,10 +50,8 @@ class MusicRepository(
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
 
-                val songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-                    .buildUpon()
-                    .appendPath(id.toString())
-                    .build()
+                val songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.buildUpon()
+                    .appendPath(id.toString()).build()
 
                 songs.add(
                     Song(
