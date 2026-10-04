@@ -2,6 +2,8 @@
 
 #include "Equalizer.h"
 
+#include <android/log.h>
+
 namespace {
 
     Equalizer* fromHandle(jlong handle) {
@@ -12,20 +14,23 @@ namespace {
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_com_example_musiczone_MainActivity_createEqualizer(
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_createEqualizer(
         JNIEnv* /* env */,
-        jobject /* this */
+        jobject /* this */,
+        jint sampleRate
 ) {
     auto* equalizer = new Equalizer();
 
-    equalizer->configure(48000.0);
+    equalizer->configure(
+            static_cast<double>(sampleRate)
+    );
 
     return reinterpret_cast<jlong>(equalizer);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_musiczone_MainActivity_destroyEqualizer(
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_destroyEqualizer(
         JNIEnv* /* env */,
         jobject /* this */,
         jlong handle
@@ -35,7 +40,7 @@ Java_com_example_musiczone_MainActivity_destroyEqualizer(
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_musiczone_MainActivity_setEqualizerBandGain(
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_setEqualizerBandGain(
         JNIEnv* /* env */,
         jobject /* this */,
         jlong handle,
@@ -48,6 +53,14 @@ Java_com_example_musiczone_MainActivity_setEqualizerBandGain(
         return;
     }
 
+    __android_log_print(
+            ANDROID_LOG_INFO,
+            "MusicZoneEQ",
+            "setBandGain: band=%d gain=%.2f dB",
+            static_cast<int>(band),
+            static_cast<double>(gainDb)
+    );
+
     equalizer->setBandGain(
             static_cast<int>(band),
             gainDb
@@ -55,8 +68,8 @@ Java_com_example_musiczone_MainActivity_setEqualizerBandGain(
 }
 
 extern "C"
-JNIEXPORT jfloatArray JNICALL
-Java_com_example_musiczone_MainActivity_processEqualizer(
+JNIEXPORT void JNICALL
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_processEqualizer(
         JNIEnv* env,
         jobject /* this */,
         jlong handle,
@@ -65,21 +78,21 @@ Java_com_example_musiczone_MainActivity_processEqualizer(
     auto* equalizer = fromHandle(handle);
 
     if (equalizer == nullptr || input == nullptr) {
-        return nullptr;
+        return;
     }
 
     const jsize sampleCount =
             env->GetArrayLength(input);
 
     if (sampleCount <= 0 || sampleCount % 2 != 0) {
-        return nullptr;
+        return;
     }
 
     jfloat* samples =
             env->GetFloatArrayElements(input, nullptr);
 
     if (samples == nullptr) {
-        return nullptr;
+        return;
     }
 
     const int frameCount =
@@ -90,30 +103,16 @@ Java_com_example_musiczone_MainActivity_processEqualizer(
             frameCount
     );
 
-    jfloatArray output =
-            env->NewFloatArray(sampleCount);
-
-    if (output != nullptr) {
-        env->SetFloatArrayRegion(
-                output,
-                0,
-                sampleCount,
-                samples
-        );
-    }
-
     env->ReleaseFloatArrayElements(
             input,
             samples,
-            JNI_ABORT
+            0
     );
-
-    return output;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_musiczone_MainActivity_resetEqualizer(
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_resetEqualizer(
         JNIEnv* /* env */,
         jobject /* this */,
         jlong handle
@@ -126,3 +125,4 @@ Java_com_example_musiczone_MainActivity_resetEqualizer(
 
     equalizer->reset();
 }
+

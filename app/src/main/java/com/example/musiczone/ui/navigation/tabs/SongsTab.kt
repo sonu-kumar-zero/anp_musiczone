@@ -1,5 +1,6 @@
 package com.example.musiczone.ui.navigation.tabs
 
+import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.UnstableApi
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.MusicViewModel
 import com.example.musiczone.ui.player.SongItem
@@ -27,6 +29,7 @@ import com.example.musiczone.ui.theme.MusicZoneSurface
 import com.example.musiczone.ui.theme.MusicZoneTextPrimary
 import com.example.musiczone.ui.theme.MusicZoneTextSecondary
 
+@OptIn(UnstableApi::class)
 @Composable
 fun SongsTab(
     searchQuery: String,

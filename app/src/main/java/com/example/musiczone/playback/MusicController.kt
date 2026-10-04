@@ -21,7 +21,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
+import android.os.Bundle
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.SessionCommand
 
+@UnstableApi
 class MusicController(
     private val context: Context
 ) {
@@ -67,9 +71,7 @@ class MusicController(
         ) {
             _currentMediaItem.value = mediaItem
 
-            _playedSongId.value = mediaItem
-                ?.mediaId
-                ?.toLongOrNull()
+            _playedSongId.value = mediaItem?.mediaId?.toLongOrNull()
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -195,15 +197,9 @@ class MusicController(
 
     fun addToQueue(song: Song) {
         val mediaItem =
-            MediaItem.Builder()
-                .setMediaId(song.id.toString())
-                .setUri(song.uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(song.title)
-                        .setArtist(song.artist)
-                        .setAlbumTitle(song.album)
-                        .build()
+            MediaItem.Builder().setMediaId(song.id.toString()).setUri(song.uri).setMediaMetadata(
+                    MediaMetadata.Builder().setTitle(song.title).setArtist(song.artist)
+                        .setAlbumTitle(song.album).build()
                 ).build()
 
         controller?.addMediaItem(mediaItem)
@@ -237,6 +233,30 @@ class MusicController(
     fun playQueueItem(index: Int) {
         controller?.seekToDefaultPosition(index)
         controller?.play()
+    }
+
+    fun setEqualizerBandGain(
+        band: Int, gainDb: Double
+    ) {
+        val mediaController = controller ?: return
+
+        val command = SessionCommand(
+            MusicService.COMMAND_SET_EQ_BAND, Bundle.EMPTY
+        )
+
+        val args = Bundle().apply {
+            putInt(
+                MusicService.EXTRA_EQ_BAND, band
+            )
+
+            putDouble(
+                MusicService.EXTRA_EQ_GAIN_DB, gainDb
+            )
+        }
+
+        mediaController.sendCustomCommand(
+            command, args
+        )
     }
 
     fun release() {

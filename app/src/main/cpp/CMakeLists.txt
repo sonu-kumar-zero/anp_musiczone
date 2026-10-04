@@ -7,6 +7,11 @@ add_library(
         SHARED
         native-lib.cpp
         equalizer/BiquadFilter.cpp
-        equalizer/equalizer.cpp
+        equalizer/Equalizer.cpp
         equalizer/EqualizerJni.cpp
+)
+
+target_link_libraries(
+        musiczone
+        log
 )

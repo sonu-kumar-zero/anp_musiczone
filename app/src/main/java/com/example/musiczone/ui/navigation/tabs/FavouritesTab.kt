@@ -62,10 +62,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.media3.common.util.UnstableApi
 import com.example.musiczone.ui.components.AlbumArtwork
 import com.example.musiczone.ui.components.MusicZoneHeader
 import com.example.musiczone.ui.theme.MusicZoneSurface
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesTab(

@@ -1,6 +1,7 @@
 package com.example.musiczone.ui.navigation.tabs
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.UnstableApi
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.MusicViewModel
 import com.example.musiczone.ui.components.AlbumArtwork
@@ -52,6 +54,7 @@ import com.example.musiczone.ui.theme.MusicZoneTextSecondary
 import kotlin.collections.get
 import kotlin.collections.orEmpty
 
+@OptIn(UnstableApi::class)
 @Composable
 fun ArtistsTab(
     songs: List<Song>,

@@ -1,5 +1,6 @@
 package com.example.musiczone.ui.player
 
+import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,11 +36,14 @@ import com.example.musiczone.ui.navigation.tabs.SongsTab
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.media3.common.util.UnstableApi
 import com.example.musiczone.model.Song
 import com.example.musiczone.ui.components.RecentSongsSection
 
@@ -47,6 +51,7 @@ private const val ROUTE_LIBRARY = "library"
 private const val ROUTE_NOW_PLAYING = "now_playing"
 
 
+@OptIn(UnstableApi::class)
 @Composable
 fun MusicLibraryScreen(
     viewModel: MusicViewModel = viewModel()
@@ -140,8 +145,7 @@ fun MusicLibraryScreen(
                                                     songs = recentSongs,
                                                     onSongClick = { song ->
                                                         viewModel.playSong(song, recentSongs)
-                                                    }
-                                                )
+                                                    })
                                             }
                                         }
 
@@ -212,6 +216,36 @@ fun MusicLibraryScreen(
 
                     // Bottom navigation
                     NavigationBar {
+                        var eqTestGain by remember {
+                            mutableDoubleStateOf(0.0)
+                        }
+
+                        NavigationBarItem(
+                            selected = eqTestGain != 0.0,
+                            onClick = {
+                                eqTestGain =
+                                    when (eqTestGain) {
+                                        0.0 -> 12.0
+                                        12.0 -> -12.0
+                                        else -> 0.0
+                                    }
+
+                                viewModel.testEqualizer(
+                                    eqTestGain
+                                )
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = "Test EQ"
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = "${eqTestGain.toInt()} dB"
+                                )
+                            }
+                        )
 
                         LibraryTab.entries.forEach { tab ->
 

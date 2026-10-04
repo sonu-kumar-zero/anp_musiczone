@@ -40,17 +40,35 @@ void Equalizer::setBandGain(
         return;
     }
 
-    gains_[band] = gainDb;
-
-    configureBand(band);
+    targetGains_[band].store(
+            gainDb,
+            std::memory_order_relaxed
+    );
 }
 
 void Equalizer::process(
-        float* samples,
+        float *samples,
         int frameCount
 ) {
     if (samples == nullptr || frameCount <= 0) {
         return;
+    }
+
+    for (int band = 0; band < BAND_COUNT; ++band) {
+        const double targetGain =
+                targetGains_[band].load(
+                        std::memory_order_relaxed
+                );
+
+        const double difference =
+                targetGain - gains_[band];
+
+        if (difference != 0.0) {
+            gains_[band] +=
+                    difference * GAIN_SMOOTHING;
+
+            configureBand(band);
+        }
     }
 
     for (int frame = 0; frame < frameCount; ++frame) {
@@ -60,8 +78,11 @@ void Equalizer::process(
         float rightSample = samples[index + 1];
 
         for (int band = 0; band < BAND_COUNT; ++band) {
-            leftSample = left_[band].process(leftSample);
-            rightSample = right_[band].process(rightSample);
+            leftSample =
+                    left_[band].process(leftSample);
+
+            rightSample =
+                    right_[band].process(rightSample);
         }
 
         samples[index] = leftSample;
@@ -71,7 +92,15 @@ void Equalizer::process(
 
 void Equalizer::reset() {
     for (int band = 0; band < BAND_COUNT; ++band) {
+        gains_[band] = 0.0;
+        targetGains_[band].store(
+                0.0,
+                std::memory_order_relaxed
+        );
+
         left_[band].reset();
         right_[band].reset();
+
+        configureBand(band);
     }
 }

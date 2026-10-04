@@ -5,29 +5,21 @@
 extern "C" {
 
 JNIEXPORT jlong JNICALL
-Java_com_example_musiczone_MainActivity_createEqualizer(
-        JNIEnv* env,
-        jobject /* this */
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_createEqualizer(
+        JNIEnv *env,
+        jobject /* this */,
+        jint sampleRate
 );
 
 JNIEXPORT void JNICALL
-Java_com_example_musiczone_MainActivity_destroyEqualizer(
-        JNIEnv* env,
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_destroyEqualizer(
+        JNIEnv *env,
         jobject /* this */,
         jlong handle
 );
 
 JNIEXPORT void JNICALL
-Java_com_example_musiczone_MainActivity_setEqualizerBandGain(
-        JNIEnv* env,
-        jobject /* this */,
-        jlong handle,
-        jint band,
-        jdouble gainDb
-);
-
-JNIEXPORT jfloatArray JNICALL
-Java_com_example_musiczone_MainActivity_processEqualizer(
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_processEqualizer(
         JNIEnv* env,
         jobject /* this */,
         jlong handle,
@@ -35,9 +27,19 @@ Java_com_example_musiczone_MainActivity_processEqualizer(
 );
 
 JNIEXPORT void JNICALL
-Java_com_example_musiczone_MainActivity_resetEqualizer(
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_setEqualizerBandGain(
         JNIEnv* env,
+        jobject /* this */,
+        jlong handle,
+        jint band,
+        jdouble gainDb
+);
+
+JNIEXPORT void JNICALL
+Java_com_example_musiczone_playback_equalizer_NativeEqualizerAudioProcessor_resetEqualizer(
+        JNIEnv *env,
         jobject /* this */,
         jlong handle
 );
+
 }

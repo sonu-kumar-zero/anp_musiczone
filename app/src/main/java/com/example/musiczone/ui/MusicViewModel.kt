@@ -1,9 +1,11 @@
 package com.example.musiczone.ui
 
 import android.app.Application
+import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import com.example.musiczone.data.MusicRepository
 import com.example.musiczone.data.SongCache
 import com.example.musiczone.model.Song
@@ -23,6 +25,7 @@ import com.example.musiczone.data.local.RecentSongRepository
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 
+@UnstableApi
 class MusicViewModel(
     application: Application
 ) : AndroidViewModel(application) {
@@ -163,6 +166,7 @@ class MusicViewModel(
             loadRecentSongs()
         }
     }
+
 
     fun playSong(song: Song, songs: List<Song> = _songs.value) {
 
@@ -384,6 +388,13 @@ class MusicViewModel(
                     }
                 }
         }
+    }
+
+    fun testEqualizer(gainDb: Double) {
+        musicController.setEqualizerBandGain(
+            band = 0,
+            gainDb = gainDb
+        )
     }
 
     override fun onCleared() {

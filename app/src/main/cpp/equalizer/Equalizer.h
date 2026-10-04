@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "BiquadFilter.h"
 
 class Equalizer {
@@ -39,6 +41,17 @@ private:
             0.0,
             0.0
     };
+
+    std::atomic<double> targetGains_[BAND_COUNT] = {
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+    };
+
+    static constexpr double GAIN_SMOOTHING =
+            0.0025;
 
     void configureBand(int band);
 };
